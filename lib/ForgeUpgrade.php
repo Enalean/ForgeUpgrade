@@ -1,47 +1,64 @@
 <?php
+/**
+ * Copyright (c) STMicroelectronics, 2010. All Rights Reserved.
+ *
+ * Originally written by Manuel Vacelet
+ *
+ * ForgeUpgrade is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * ForgeUpgrade is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with ForgeUpgrade. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 require 'ForgeUpgradeDb.php';
 
+/**
+ * Centralize upgrade of the Forge
+ */
 class ForgeUpgrade {
+    /**
+     * @var ForgeUpgradeDb
+     */
+    protected $db;
 
-    public function run() {
-        try {
-            if (strpos($GLOBALS['sys_dbhost'], ':') !== false) {
-                list($host, $socket) = explode(':', $GLOBALS['sys_dbhost']);
-                $socket = ';unix_socket='.$socket;
-            } else {
-                $host   = $GLOBALS['sys_dbhost'];
-                $socket = '';
-            }
-
-            $dbh = new PDO('mysql:host='.$host.$socket.';dbname='.$GLOBALS['sys_dbname'], $GLOBALS['sys_dbuser'], $GLOBALS['sys_dbpasswd'], array(PDO::MYSQL_ATTR_INIT_COMMAND =>  'SET NAMES \'UTF8\''));
-            $this->db = new ForgeUpgradeDb($dbh);
-
-
-            $this->runMigrations();
-
-        } catch (PDOException $e) {
-            echo 'Connection faild: '.$e->getMessage().PHP_EOL;
-        }
+    /**
+     * Constructor
+     */
+    public function __construct(PDO $dbh) {
+        $this->db = new ForgeUpgradeDb($dbh);
     }
 
-    public function runMigrations() {
+    /**
+     * Run all available migrations
+     */
+    public function run() {
         $this->runMigration('migrations/201004081445_add_tables_for_docman_watermarking.php');
     }
 
-
     /**
      * Load one migration and execute it
+     *
+     * @param String $scriptPath Path to the script to execute
+     *
+     * @return void
      */
-    public function runMigration($scriptPath) {
+    protected function runMigration($scriptPath) {
         include $scriptPath;
 
         $class = $this->getClassName($scriptPath);
-        if ($class !== null) {
+        if ($class != '') {
             $upg = new $class($this->db);
             echo $upg->description();
             $upg->up();
-            var_dump($upg->getMessages());
+            var_dump($upg->getLogs());
         }
     }
 
@@ -49,17 +66,19 @@ class ForgeUpgrade {
      * Deduce the class name from the script name
      *
      * migrations/201004081445_add_tables_for_docman_watermarking.php -> AddTablesForDocmanWatermarking
+     *
+     * @param String $scriptPath Path to the script to execute
+     *
+     * @return String
      */
-    protected function getClassName($script) {
-        if(preg_match('%^[0-9]+_(.*)\.php$%', basename($script), $matches)) {
+    protected function getClassName($scriptPath) {
+        if(preg_match('%^[0-9]+_(.*)\.php$%', basename($scriptPath), $matches)) {
             $words    = explode('_', $matches[1]);
             $capWords = array_map('ucfirst', $words);
             return implode('', $capWords);
         }
-        return null;
+        return '';
     }
-
-
 }
 
 
