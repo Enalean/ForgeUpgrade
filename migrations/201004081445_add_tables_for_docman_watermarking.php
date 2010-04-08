@@ -1,6 +1,6 @@
 <?php
 
-require 'ForgeUpgradeBucket.php';
+require dirname(__FILE__).'/../lib/ForgeUpgradeBucket.php';
 
 class AddTablesForDocmanWatermarking extends ForgeUpgradeBucket {
 
