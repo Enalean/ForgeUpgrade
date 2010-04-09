@@ -19,6 +19,7 @@
  */
 
 require 'ForgeUpgradeDb.php';
+require 'ForgeUpgradeBucketFilter.php';
 
 /**
  * Centralize upgrade of the Forge
@@ -40,7 +41,21 @@ class ForgeUpgrade {
      * Run all available migrations
      */
     public function run() {
-        $this->runMigration('migrations/201004081445_add_tables_for_docman_watermarking.php');
+        foreach ($this->getMigrationFiles('migrations') as $file) {
+            //echo "$v".PHP_EOL;
+            $this->runMigration($file);
+        }
+    }
+
+    /**
+     *
+     * @return Array of SplFileInfo
+     */
+    protected function getMigrationFiles($dirPath) {
+        $dir   = new RecursiveDirectoryIterator($dirPath);
+        $iter  = new RecursiveIteratorIterator($dir);
+        $files = new UpgradeBucketFilter($iter);
+        return $files;
     }
 
     /**
@@ -50,10 +65,10 @@ class ForgeUpgrade {
      *
      * @return void
      */
-    protected function runMigration($scriptPath) {
-        include $scriptPath;
+    protected function runMigration(SplFileInfo $scriptPath) {
+        include $scriptPath->getPathname();
 
-        $class = $this->getClassName($scriptPath);
+        $class = $this->getClassName($scriptPath->getPathname());
         if ($class != '') {
             $upg = new $class($this->db);
             echo $upg->description();
