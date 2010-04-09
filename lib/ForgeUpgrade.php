@@ -41,21 +41,26 @@ class ForgeUpgrade {
      * Run all available migrations
      */
     public function run() {
-        foreach ($this->getMigrationFiles('migrations') as $file) {
-            //echo "$v".PHP_EOL;
+        foreach ($this->getMigrationBuckets('migrations') as $file) {
             $this->runMigration($file);
         }
     }
 
     /**
+     * Find all migration files and sort them in time order
      *
      * @return Array of SplFileInfo
      */
-    protected function getMigrationFiles($dirPath) {
-        $dir   = new RecursiveDirectoryIterator($dirPath);
-        $iter  = new RecursiveIteratorIterator($dir);
-        $files = new UpgradeBucketFilter($iter);
-        return $files;
+    protected function getMigrationBuckets($dirPath) {
+        $dir    = new RecursiveDirectoryIterator($dirPath);
+        $iter   = new RecursiveIteratorIterator($dir);
+        $files  = new UpgradeBucketFilter($iter);
+        $toSort = array();
+        foreach ($files as $file) {
+            $toSort[basename($file->getPathname())] = $file;
+        }
+        ksort($toSort, SORT_STRING);
+        return $toSort;
     }
 
     /**
@@ -69,7 +74,7 @@ class ForgeUpgrade {
         include $scriptPath->getPathname();
 
         $class = $this->getClassName($scriptPath->getPathname());
-        if ($class != '') {
+        if ($class != '' && class_exists($class)) {
             $upg = new $class($this->db);
             echo $upg->description();
             $upg->up();
