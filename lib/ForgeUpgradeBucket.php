@@ -52,6 +52,35 @@ abstract class ForgeUpgradeBucket {
     abstract public function up();
 
     /**
+     * Ensure the package is OK before running Up method
+     *
+     * Use this method add your own pre-conditions.
+     * This method aims to verify stuff needed by the up method it doesn't
+     * target a global validation of the application.
+     *
+     * This method MUST be safe (doesn't modify the system and runnable several
+     * time)
+     *
+     * @return Boolean True if up could be run.
+     */
+    public function preUp() {
+    }
+
+    /**
+     * Ensure the package is OK after running Up method
+     *
+     * Use this method add your own post-conditions.
+     * This method aims to verify that what the migration should bring is here.
+     *
+     * This method MUST be safe (doesn't modify the system and runnable several
+     * time)
+     *
+     * @return Boolean True if up did it's job.
+     */
+    public function postUp() {
+    }
+
+    /**
      * Return all collected messages
      */
     public function getLogs() {
