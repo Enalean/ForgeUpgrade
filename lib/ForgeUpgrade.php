@@ -40,6 +40,15 @@ class ForgeUpgrade {
     }
 
     /**
+     * Run all available migrations
+     */
+    public function run() {
+        if ($this->runPreUp()) {
+            $this->runUp();
+        }
+    }
+
+    /**
      * Run all preUp methods
      *
      * Run all possible preUp, if a dependency is defined between 2 scripts,
@@ -67,16 +76,7 @@ class ForgeUpgrade {
     }
 
     /**
-     * Run all available migrations
-     */
-    public function run() {
-        if ($this->runPreUp()) {
-            $this->runUp();
-        }
-    }
-
-    /**
-     * Load one migration and execute it
+     * Load all migrations and execute them
      *
      * @param String $scriptPath Path to the script to execute
      *
