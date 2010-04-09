@@ -1,6 +1,6 @@
 <?php
 
-require dirname(__FILE__).'/../lib/ForgeUpgradeBucket.php';
+require_once dirname(__FILE__).'/../lib/ForgeUpgradeBucket.php';
 
 class AddTablesForDocmanWatermarking extends ForgeUpgradeBucket {
 
@@ -32,7 +32,6 @@ EOT;
             return false;
         }
     }
-
 }
 
 ?>

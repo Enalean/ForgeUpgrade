@@ -29,14 +29,17 @@ abstract class ForgeUpgradeBucket {
     protected $logs;
     protected $db;
 
+    protected $dryRun;
+
     /**
      * Constructor
      *
      * @param ForgeUpgradeDb Database access
      */
     public function __construct(ForgeUpgradeDb $db) {
-        $this->logs = array();
-        $this->db   = $db;
+        $this->logs   = array();
+        $this->db     = $db;
+        $this->dryRun = true;
     }
 
     /**
@@ -47,9 +50,12 @@ abstract class ForgeUpgradeBucket {
     abstract public function description();
 
     /**
-     * Perform the upgrade
+     * Allow to define a dependency list
+     *
+     * @return Array
      */
-    abstract public function up();
+    public function dependsOn() {
+    }
 
     /**
      * Ensure the package is OK before running Up method
@@ -64,7 +70,13 @@ abstract class ForgeUpgradeBucket {
      * @return Boolean True if up could be run.
      */
     public function preUp() {
+        return true;
     }
+
+    /**
+     * Perform the upgrade
+     */
+    abstract public function up();
 
     /**
      * Ensure the package is OK after running Up method
@@ -78,6 +90,23 @@ abstract class ForgeUpgradeBucket {
      * @return Boolean True if up did it's job.
      */
     public function postUp() {
+        return true;
+    }
+
+
+
+
+
+
+    /**
+     *
+     */
+    public function setDryRun($mode) {
+        $this->dryRun = ($mode === true);
+    }
+
+    public function getDryRun() {
+        return $this->dryRun();
     }
 
     /**

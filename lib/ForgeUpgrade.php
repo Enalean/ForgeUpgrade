@@ -30,6 +30,8 @@ class ForgeUpgrade {
      */
     protected $db;
 
+    protected $buckets = null;
+
     /**
      * Constructor
      */
@@ -38,29 +40,39 @@ class ForgeUpgrade {
     }
 
     /**
-     * Run all available migrations
+     * Run all preUp methods
+     *
+     * Run all possible preUp, if a dependency is defined between 2 scripts,
+     * preUp of the script that depends on another is skipped.
+     *
+     * @todo: Add info on the number of buckets Success, Faild, Skipped
      */
-    public function run() {
+    public function runPreUp() {
+        echo "[Pre Up] Run pre up checks".PHP_EOL;
+        $result = true;
         foreach ($this->getMigrationBuckets('migrations') as $file) {
-            $this->runMigration($file);
+            $bucket = $this->getMigrationClass($file);
+            if (!$bucket->dependsOn()) {
+                $br     = $bucket->preUp();
+                $result = $result & $br;
+                $strRes = $result ? 'OK' : 'FAILD';
+                echo "[Pre Up] ".$strRes.': '.get_class($bucket).PHP_EOL;
+            } else {
+                echo "[Pre Up] SKIP: ".get_class($bucket)." depends on a migration not already applied".PHP_EOL;
+            }
         }
+        $strRes = $result ? 'OK' : 'FAILD';
+        echo "[Pre Up] Global: ".$strRes.PHP_EOL;
+        return $result;
     }
 
     /**
-     * Find all migration files and sort them in time order
-     *
-     * @return Array of SplFileInfo
+     * Run all available migrations
      */
-    protected function getMigrationBuckets($dirPath) {
-        $dir    = new RecursiveDirectoryIterator($dirPath);
-        $iter   = new RecursiveIteratorIterator($dir);
-        $files  = new UpgradeBucketFilter($iter);
-        $toSort = array();
-        foreach ($files as $file) {
-            $toSort[basename($file->getPathname())] = $file;
+    public function run() {
+        if ($this->runPreUp()) {
+            $this->runUp();
         }
-        ksort($toSort, SORT_STRING);
-        return $toSort;
     }
 
     /**
@@ -70,16 +82,54 @@ class ForgeUpgrade {
      *
      * @return void
      */
-    protected function runMigration(SplFileInfo $scriptPath) {
-        include $scriptPath->getPathname();
-
-        $class = $this->getClassName($scriptPath->getPathname());
-        if ($class != '' && class_exists($class)) {
-            $upg = new $class($this->db);
-            echo $upg->description();
-            $upg->up();
-            var_dump($upg->getLogs());
+    protected function runUp() {
+        echo '[Up] Start running migrations...'.PHP_EOL;
+        foreach ($this->getMigrationBuckets('migrations') as $file) {
+            $bucket = $this->getMigrationClass($file);
+            if ($bucket) {
+                $className = get_class($bucket);
+                echo "[Up] $className".PHP_EOL;
+                echo $bucket->description();
+                if($bucket->preUp()) {
+                    echo "[Up] $className PreUp OK".PHP_EOL;
+                    $bucket->up();
+                    echo "[Up] $className Done".PHP_EOL;
+                    $bucket->postUp();
+                }
+                var_dump($bucket->getLogs());
+            }
         }
+    }
+
+    /**
+     * Find all migration files and sort them in time order
+     *
+     * @return Array of SplFileInfo
+     */
+    protected function getMigrationBuckets($dirPath) {
+        if (!isset($this->buckets)) {
+            $dir    = new RecursiveDirectoryIterator($dirPath);
+            $iter   = new RecursiveIteratorIterator($dir);
+            $files  = new UpgradeBucketFilter($iter);
+            $this->buckets = array();
+            foreach ($files as $file) {
+                $this->buckets[basename($file->getPathname())] = $file;
+            }
+            ksort($this->buckets, SORT_STRING);
+        }
+        return $this->buckets;
+    }
+
+    protected function getMigrationClass(SplFileInfo $scriptPath) {
+        $bucket = null;
+        $class  = $this->getClassName($scriptPath->getPathname());
+        if (!class_exists($class)) {
+            include $scriptPath->getPathname();
+        }
+        if ($class != '' && class_exists($class)) {
+            $bucket = new $class($this->db);
+        }
+        return $bucket;
     }
 
     /**
