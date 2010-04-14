@@ -25,7 +25,7 @@ ini_set('memory_limit', -1);
 
 require getenv('CODENDI_LOCAL_INC') ? getenv('CODENDI_LOCAL_INC') : '/etc/codendi/conf/local.inc' ;
 require $GLOBALS['db_config_file'];
-require 'lib/ForgeUpgrade.php';
+require 'src/ForgeUpgrade.php';
 
 try {
     if (strpos($GLOBALS['sys_dbhost'], ':') !== false) {
