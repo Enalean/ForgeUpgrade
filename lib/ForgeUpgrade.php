@@ -60,14 +60,17 @@ class ForgeUpgrade {
         echo "[Pre Up] Run pre up checks".PHP_EOL;
         $result = true;
         foreach ($this->getMigrationBuckets('migrations') as $file) {
-            $bucket = $this->getMigrationClass($file);
-            if (!$bucket->dependsOn()) {
-                $br     = $bucket->preUp();
-                $result = $result & $br;
-                $strRes = $result ? 'OK' : 'FAILD';
-                echo "[Pre Up] ".$strRes.': '.get_class($bucket).PHP_EOL;
-            } else {
-                echo "[Pre Up] SKIP: ".get_class($bucket)." depends on a migration not already applied".PHP_EOL;
+            try {
+                $bucket = $this->getMigrationClass($file);
+                if (!$bucket->dependsOn()) {
+                    $bucket->preUp();
+                    echo "[Pre Up] OK : ".get_class($bucket).PHP_EOL;
+                } else {
+                    echo "[Pre Up] SKIP: ".get_class($bucket)." depends on a migration not already applied".PHP_EOL;
+                }
+            } catch (Exception $e) {
+                echo "[Pre Up] ERROR : ".get_class($bucket).PHP_EOL;
+                $result = false;
             }
         }
         $strRes = $result ? 'OK' : 'FAILD';
@@ -83,30 +86,27 @@ class ForgeUpgrade {
      * @return void
      */
     protected function runUp() {
-        echo '[Up] Start running migrations...'.PHP_EOL;
-        foreach ($this->getMigrationBuckets('migrations') as $file) {
-            $bucket = $this->getMigrationClass($file);
-            if ($bucket) {
-                $className = get_class($bucket);
-                echo "[Up] $className".PHP_EOL;
-                echo $bucket->description();
-                try {
+        try {
+            echo '[Up] Start running migrations...'.PHP_EOL;
+            foreach ($this->getMigrationBuckets('migrations') as $file) {
+                $bucket = $this->getMigrationClass($file);
+                if ($bucket) {
+                    $className = get_class($bucket);
+                    echo "[Up] $className".PHP_EOL;
+                    echo $bucket->description();
                     $bucket->preUp();
                     echo "[Up] $className PreUp OK".PHP_EOL;
                     $bucket->up();
                     echo "[Up] $className Up OK".PHP_EOL;
                     $bucket->postUp();
                     echo "[Up] $className Done".PHP_EOL;
-                } catch (Exception $e) {
-                    // Log failure
-                    echo "[Up] ERROR: ".$e->getMessage().PHP_EOL;
 
-                    //if (!$this->forcecontinue) {
-                        break;
-                    //}
+                    var_dump($bucket->getLogs());
                 }
-                var_dump($bucket->getLogs());
             }
+        } catch (Exception $e) {
+            // Log failure
+            echo "[Up] ERROR: ".$e->getMessage().PHP_EOL;
         }
     }
 
