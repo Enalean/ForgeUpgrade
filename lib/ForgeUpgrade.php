@@ -102,7 +102,7 @@ class ForgeUpgrade {
                     echo "[Up] ERROR: ".$e->getMessage().PHP_EOL;
 
                     //if (!$this->forcecontinue) {
-                    break;
+                        break;
                     //}
                 }
                 var_dump($bucket->getLogs());

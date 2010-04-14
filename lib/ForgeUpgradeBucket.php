@@ -69,10 +69,19 @@ abstract class ForgeUpgradeBucket {
      * This method MUST be safe (doesn't modify the system and runnable several
      * time)
      *
-     * @return Boolean True if up could be run.
+     * If an error is detected, this method should throw an Exception and this
+     * will stop further processing. So only throw an Exception if you detect
+     * that something will go wrong during 'up' method execution.
+     * For instance:
+     * Your 'up' method creates a table but this table already exists.
+     * -> This should not throw an exception.
+     * -> But if:
+     *    - your up method rely on a given field in the table
+     *    - this field is not present in the existing table
+     *    - you doesn't create the field in 'up'
+     * -> This should throw an exception
      */
     public function preUp() {
-        return true;
     }
 
     /**
@@ -89,10 +98,9 @@ abstract class ForgeUpgradeBucket {
      * This method MUST be safe (doesn't modify the system and runnable several
      * time)
      *
-     * @return Boolean True if up did it's job.
+     * If an error is detected, this method should throw an Exception
      */
     public function postUp() {
-        return true;
     }
 
 
