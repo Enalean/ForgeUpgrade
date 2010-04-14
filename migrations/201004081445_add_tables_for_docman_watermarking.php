@@ -17,7 +17,7 @@ EOT;
                '  item_id INT(11) UNSIGNED NOT NULL,'.
                '  PRIMARY KEY(item_id)'.
                ')';
-        $this->db->createTable($this, 'plugin_docmanwatermark_item_excluded', $sql);
+        $this->db->createTable('plugin_docmanwatermark_item_excluded', $sql);
 
         $sql = 'CREATE TABLE plugin_docmanwatermark_item_excluded_log ('.
                '  item_id INT(11) UNSIGNED NOT NULL,'.
@@ -26,7 +26,7 @@ EOT;
                '  watermarked TINYINT(4) UNSIGNED NOT NULL DEFAULT 0,'.
                '  INDEX idx_show_log(item_id, time)'.
                ')';
-        $this->db->createTable($this, 'plugin_docmanwatermark_item_excluded_log', $sql);
+        $this->db->createTable('plugin_docmanwatermark_item_excluded_log', $sql);
     }
 
     public function postUp() {

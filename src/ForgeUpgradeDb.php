@@ -27,13 +27,16 @@ require 'ForgeUpgradeDbException.php';
 class ForgeUpgradeDb {
     public $dbh;
 
+    protected $log;
+
     /**
      * Constructor
      *
      * @param PDO $dbh PDO database handler
      */
-    public function __construct(PDO $dbh) {
+    public function __construct(PDO $dbh, Logger $log) {
         $this->dbh = $dbh;
+        $this->log = $log;
     }
 
     /**
@@ -59,27 +62,22 @@ class ForgeUpgradeDb {
      *
      * Create new table if not already exists and report errors.
      *
-     * @param ForgeUpgradeBucket $bucket    The migration class
      * @param String             $tableName Table name
      * @param String             $sql       The create table statement
-     *
-     * @return Boolean
      */
-    public function createTable(ForgeUpgradeBucket $bucket, $tableName, $sql) {
-        $bucket->log(ForgeUpgradeBucket::LOG_INFO, 'Add table '.$tableName);
+    public function createTable($tableName, $sql) {
+        $this->log->info('Add table '.$tableName);
         if (!$this->tableExists($tableName)) {
             $res = $this->dbh->exec($sql);
             if ($res === false) {
                 $info = $this->dbh->errorInfo();
-                $msg  = 'An error occured adding table '.$tableName.': '.$info[2].' ('.$info[1].' - '.$info[0].')';
-                $bucket->log(ForgeUpgradeBucket::LOG_INFO, $msg);
+                $this->log->error('An error occured adding table '.$tableName.': '.$info[2].' ('.$info[1].' - '.$info[0].')');
                 throw new ForgeUpgradeDbException($msg);
             }
-            $bucket->log(ForgeUpgradeBucket::LOG_INFO, $tableName.' successfully added');
+            $this->log->info($tableName.' successfully added');
         } else {
-            $bucket->log(ForgeUpgradeBucket::LOG_INFO, $tableName.' already exists');
+            $this->log->info($tableName.' already exists');
         }
-        return true;
     }
 
 }

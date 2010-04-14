@@ -26,6 +26,7 @@ ini_set('memory_limit', -1);
 require getenv('CODENDI_LOCAL_INC') ? getenv('CODENDI_LOCAL_INC') : '/etc/codendi/conf/local.inc' ;
 require $GLOBALS['db_config_file'];
 require 'src/ForgeUpgrade.php';
+require 'lib/log4php/Logger.php';
 
 try {
     if (strpos($GLOBALS['sys_dbhost'], ':') !== false) {
@@ -41,7 +42,10 @@ try {
                    $GLOBALS['sys_dbpasswd'],
                    array(PDO::MYSQL_ATTR_INIT_COMMAND =>  'SET NAMES \'UTF8\''));
 
-    $upg = new ForgeUpgrade($dbh);
+
+    $log = Logger::getLogger("ForgeUpgrade");
+
+    $upg = new ForgeUpgrade($dbh, $log);
     $upg->run();
 
 } catch (PDOException $e) {

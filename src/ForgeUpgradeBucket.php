@@ -24,12 +24,8 @@ require_once 'ForgeUpgradeBucketExceptions.php';
  * A bucket is a migration scenario
  */
 abstract class ForgeUpgradeBucket {
-    const LOG_INFO    = 'info';
-    const LOG_WARNING = 'warning';
-    const LOG_ERROR   = 'error';
-
-    protected $logs;
     protected $db;
+    protected $log;
 
     protected $dryRun;
 
@@ -38,9 +34,9 @@ abstract class ForgeUpgradeBucket {
      *
      * @param ForgeUpgradeDb Database access
      */
-    public function __construct(ForgeUpgradeDb $db) {
-        $this->logs   = array();
+    public function __construct(ForgeUpgradeDb $db, Logger $log) {
         $this->db     = $db;
+        $this->logs   = $log;
         $this->dryRun = true;
     }
 
@@ -117,24 +113,6 @@ abstract class ForgeUpgradeBucket {
 
     public function getDryRun() {
         return $this->dryRun();
-    }
-
-    /**
-     * Return all collected messages
-     */
-    public function getLogs() {
-        return $this->logs;
-    }
-
-    /**
-     * Happend a new log message
-     *
-     * @todo Define what each level is.
-     *
-     * @param String $logs Message to report
-     */
-    public function log($type, $msg) {
-        $this->logs[] = array('type' => $type, 'date' => microtime(true), 'msg' => $msg);
     }
 }
 

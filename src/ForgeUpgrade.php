@@ -30,13 +30,16 @@ class ForgeUpgrade {
      */
     protected $db;
 
+    protected $log;
+
     protected $buckets = null;
 
     /**
      * Constructor
      */
-    public function __construct(PDO $dbh) {
-        $this->db = new ForgeUpgradeDb($dbh);
+    public function __construct(PDO $dbh, Logger $log) {
+        $this->db  = new ForgeUpgradeDb($dbh, $log);
+        $this->log = $log;
     }
 
     /**
@@ -57,24 +60,28 @@ class ForgeUpgrade {
      * @todo: Add info on the number of buckets Success, Faild, Skipped
      */
     public function runPreUp() {
-        echo "[Pre Up] Run pre up checks".PHP_EOL;
+        $this->log->info("[Pre Up] Run pre up checks");
         $result = true;
         foreach ($this->getMigrationBuckets('migrations') as $file) {
             try {
                 $bucket = $this->getMigrationClass($file);
                 if (!$bucket->dependsOn()) {
                     $bucket->preUp();
-                    echo "[Pre Up] OK : ".get_class($bucket).PHP_EOL;
+                    $this->log->info("[Pre Up] OK : ".get_class($bucket));
                 } else {
-                    echo "[Pre Up] SKIP: ".get_class($bucket)." depends on a migration not already applied".PHP_EOL;
+                    $this->log->info("[Pre Up] SKIP: ".get_class($bucket)." depends on a migration not already applied");
                 }
             } catch (Exception $e) {
-                echo "[Pre Up] ERROR : ".get_class($bucket).PHP_EOL;
+                $this->log->error("[Pre Up] ERROR : ".get_class($bucket));
                 $result = false;
             }
         }
-        $strRes = $result ? 'OK' : 'FAILD';
-        echo "[Pre Up] Global: ".$strRes.PHP_EOL;
+        if ($result) {
+            $this->log->info("[Pre Up] Global: OK");
+        } else {
+            $this->log->error("[Pre Up] Global: FAILD");
+        }
+
         return $result;
     }
 
@@ -87,26 +94,23 @@ class ForgeUpgrade {
      */
     protected function runUp() {
         try {
-            echo '[Up] Start running migrations...'.PHP_EOL;
+            $this->log->info('[Up] Start running migrations...');
             foreach ($this->getMigrationBuckets('migrations') as $file) {
                 $bucket = $this->getMigrationClass($file);
                 if ($bucket) {
                     $className = get_class($bucket);
-                    echo "[Up] $className".PHP_EOL;
+                    $this->log->info("[Up] $className");
                     echo $bucket->description();
                     $bucket->preUp();
-                    echo "[Up] $className PreUp OK".PHP_EOL;
+                    $this->log->info("[Up] $className PreUp OK");
                     $bucket->up();
-                    echo "[Up] $className Up OK".PHP_EOL;
+                    $this->log->info("[Up] $className Up OK");
                     $bucket->postUp();
-                    echo "[Up] $className Done".PHP_EOL;
-
-                    var_dump($bucket->getLogs());
+                    $this->log->info("[Up] $className Done");
                 }
             }
         } catch (Exception $e) {
-            // Log failure
-            echo "[Up] ERROR: ".$e->getMessage().PHP_EOL;
+            $this->log->error("[Up] ".$e->getMessage());
         }
     }
 
@@ -136,7 +140,7 @@ class ForgeUpgrade {
             include $scriptPath->getPathname();
         }
         if ($class != '' && class_exists($class)) {
-            $bucket = new $class($this->db);
+            $bucket = new $class($this->db, $this->log);
         }
         return $bucket;
     }
