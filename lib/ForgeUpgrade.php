@@ -90,11 +90,20 @@ class ForgeUpgrade {
                 $className = get_class($bucket);
                 echo "[Up] $className".PHP_EOL;
                 echo $bucket->description();
-                if($bucket->preUp()) {
+                try {
+                    $bucket->preUp();
                     echo "[Up] $className PreUp OK".PHP_EOL;
                     $bucket->up();
-                    echo "[Up] $className Done".PHP_EOL;
+                    echo "[Up] $className Up OK".PHP_EOL;
                     $bucket->postUp();
+                    echo "[Up] $className Done".PHP_EOL;
+                } catch (Exception $e) {
+                    // Log failure
+                    echo "[Up] ERROR: ".$e->getMessage().PHP_EOL;
+
+                    //if (!$this->forcecontinue) {
+                    break;
+                    //}
                 }
                 var_dump($bucket->getLogs());
             }

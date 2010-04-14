@@ -18,6 +18,11 @@
  * along with ForgeUpgrade. If not, see <http://www.gnu.org/licenses/>.
  */
 
+// An upgrade process shouldn't end because it takes too much time ot too
+// memory.
+ini_set('max_execution_time', 0);
+ini_set('memory_limit', -1);
+
 require getenv('CODENDI_LOCAL_INC') ? getenv('CODENDI_LOCAL_INC') : '/etc/codendi/conf/local.inc' ;
 require $GLOBALS['db_config_file'];
 require 'lib/ForgeUpgrade.php';

@@ -18,6 +18,8 @@
  * along with ForgeUpgrade. If not, see <http://www.gnu.org/licenses/>.
  */
 
+require 'ForgeUpgradeDbException.php';
+
 /**
  * Wrap accesss to the DB and provide a set of convenient tools to write
  * DB upgrades
@@ -71,7 +73,7 @@ class ForgeUpgradeDb {
                 $info = $this->dbh->errorInfo();
                 $msg  = 'An error occured adding table '.$tableName.': '.$info[2].' ('.$info[1].' - '.$info[0].')';
                 $bucket->log(ForgeUpgradeBucket::LOG_INFO, $msg);
-                return false;
+                throw new ForgeUpgradeDbException($msg);
             }
             $bucket->log(ForgeUpgradeBucket::LOG_INFO, $tableName.' successfully added');
         } else {
