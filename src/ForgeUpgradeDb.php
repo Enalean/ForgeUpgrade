@@ -34,9 +34,9 @@ class ForgeUpgradeDb {
      *
      * @param PDO $dbh PDO database handler
      */
-    public function __construct(PDO $dbh, Logger $log) {
+    public function __construct(PDO $dbh) {
         $this->dbh = $dbh;
-        $this->log = $log;
+        $this->log = Logger::getLogger('ForgeUpgrade.Db');
     }
 
     /**
@@ -54,7 +54,6 @@ class ForgeUpgradeDb {
         } else {
             return false;
         }
-
     }
 
     /**

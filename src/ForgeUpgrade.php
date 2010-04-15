@@ -37,9 +37,9 @@ class ForgeUpgrade {
     /**
      * Constructor
      */
-    public function __construct(PDO $dbh, Logger $log) {
-        $this->db  = new ForgeUpgradeDb($dbh, $log);
-        $this->log = $log;
+    public function __construct(PDO $dbh) {
+        $this->db  = new ForgeUpgradeDb($dbh);
+        $this->log = Logger::getLogger('ForgeUpgrade');
     }
 
     /**
@@ -140,7 +140,7 @@ class ForgeUpgrade {
             include $scriptPath->getPathname();
         }
         if ($class != '' && class_exists($class)) {
-            $bucket = new $class($this->db, $this->log);
+            $bucket = new $class($this->db);
         }
         return $bucket;
     }

@@ -34,9 +34,9 @@ abstract class ForgeUpgradeBucket {
      *
      * @param ForgeUpgradeDb Database access
      */
-    public function __construct(ForgeUpgradeDb $db, Logger $log) {
+    public function __construct(ForgeUpgradeDb $db) {
         $this->db     = $db;
-        $this->logs   = $log;
+        $this->log    = Logger::getLogger('ForgeUpgrade.Bucket');
         $this->dryRun = true;
     }
 

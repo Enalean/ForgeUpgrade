@@ -42,10 +42,7 @@ try {
                    $GLOBALS['sys_dbpasswd'],
                    array(PDO::MYSQL_ATTR_INIT_COMMAND =>  'SET NAMES \'UTF8\''));
 
-
-    $log = Logger::getLogger("ForgeUpgrade");
-
-    $upg = new ForgeUpgrade($dbh, $log);
+    $upg = new ForgeUpgrade($dbh);
     $upg->run();
 
 } catch (PDOException $e) {
