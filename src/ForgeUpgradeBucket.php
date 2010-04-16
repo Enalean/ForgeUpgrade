@@ -27,7 +27,8 @@ abstract class ForgeUpgradeBucket {
     protected $db;
     protected $log;
 
-    protected $dryRun;
+    protected $dryRun = true;
+    protected $path   = '';
 
     /**
      * Constructor
@@ -37,7 +38,6 @@ abstract class ForgeUpgradeBucket {
     public function __construct(ForgeUpgradeDb $db) {
         $this->db     = $db;
         $this->log    = Logger::getLogger('ForgeUpgrade.Bucket');
-        $this->dryRun = true;
     }
 
     /**
@@ -113,6 +113,14 @@ abstract class ForgeUpgradeBucket {
 
     public function getDryRun() {
         return $this->dryRun();
+    }
+
+    public function setPath($path) {
+        $this->path = $path;
+    }
+
+    public function getPath() {
+        return $this->path;
     }
 }
 
