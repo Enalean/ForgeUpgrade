@@ -57,6 +57,23 @@ class ForgeUpgradeDb {
     }
 
     /**
+     * Return true if the given index on the table already exists into the database
+     *
+     * @param String $tableName Table name 
+     * @param String $index     Index
+     *
+     * @return Boolean
+     */
+    public function indexExists($index, $tableName) {
+        $sql = 'SHOW INDEX FROM '.$this->dbh->quote($tableName).' LIKE '.$this->dbh->quote($tableName);
+        $res = $this->dbh->query($sql);
+        if ($res && $res->fetch() !== false) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    /**
      * Create new table
      *
      * Create new table if not already exists and report errors.
@@ -76,6 +93,52 @@ class ForgeUpgradeDb {
             $this->log->info($tableName.' successfully added');
         } else {
             $this->log->info($tableName.' already exists');
+        }
+    }
+    
+    /**
+     * Delete table
+     *
+     * Delete table if exists and report errors.
+     *
+     * @param String             $tableName Table name
+     * @param String             $sql       The delete table statement
+     */
+    public function deleteTable($tableName, $sql) {
+        $this->log->info('Delete table '.$tableName);
+        if ($this->tableExists($tableName)) {
+            $res = $this->dbh->exec($sql);
+            if ($res === false) {
+                $info = $this->dbh->errorInfo();
+                $this->log->error('An error occured deleting table '.$tableName.': '.$info[2].' ('.$info[1].' - '.$info[0].')');
+                throw new ForgeUpgradeDbException($msg);
+            }
+            $this->log->info($tableName.' successfully deleted');
+        } else {
+            $this->log->info($tableName.' already not exists');
+        }
+    }
+
+    /**
+     * Add index
+     *
+     * Alter table to add index and report errors.
+     *
+     * @param String             $tableName Table name
+     * @param String             $sql       The add index statement
+     */
+    public function addIndex($index, $tableName, $sql) {
+        $this->log->info('Add index '.$tableName);
+        if ($this->indexExists($index, $tableName)) {
+            $res = $this->dbh->exec($sql);
+            if ($res === false) {
+                $info = $this->dbh->errorInfo();
+                $this->log->error('An error occured adding index to '.$tableName.': '.$info[2].' ('.$info[1].' - '.$info[0].')');
+                throw new ForgeUpgradeDbException($msg);
+            }
+            $this->log->info($tableName.' successfully added index');
+        } else {
+            $this->log->info($tableName.' not exists');
         }
     }
 
