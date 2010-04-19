@@ -64,8 +64,8 @@ class ForgeUpgradeDb {
      *
      * @return Boolean
      */
-    public function indexExists($index, $tableName) {
-        $sql = 'SHOW INDEX FROM '.$this->dbh->quote($tableName).' LIKE '.$this->dbh->quote($tableName);
+    public function indexExists($tableName, $index) {
+        $sql = 'SHOW INDEX FROM '.$tableName.' WHERE Key_name LIKE '.$this->dbh->quote($index);
         $res = $this->dbh->query($sql);
         if ($res && $res->fetch() !== false) {
             return true;
@@ -115,7 +115,7 @@ class ForgeUpgradeDb {
             }
             $this->log->info($tableName.' successfully deleted');
         } else {
-            $this->log->info($tableName.' already not exists');
+            $this->log->info($tableName.' not exists');
         }
     }
 
@@ -127,18 +127,18 @@ class ForgeUpgradeDb {
      * @param String             $tableName Table name
      * @param String             $sql       The add index statement
      */
-    public function addIndex($index, $tableName, $sql) {
+    public function addIndex($tableName, $index, $sql) {
         $this->log->info('Add index '.$tableName);
-        if ($this->indexExists($index, $tableName)) {
+        if (!$this->indexExists($tableName, $index)) {
             $res = $this->dbh->exec($sql);
             if ($res === false) {
                 $info = $this->dbh->errorInfo();
                 $this->log->error('An error occured adding index to '.$tableName.': '.$info[2].' ('.$info[1].' - '.$info[0].')');
                 throw new ForgeUpgradeDbException($msg);
             }
-            $this->log->info($tableName.' successfully added index');
+            $this->log->info($index.' successfully added index');
         } else {
-            $this->log->info($tableName.' not exists');
+            $this->log->info($index.' already exists');
         }
     }
 
