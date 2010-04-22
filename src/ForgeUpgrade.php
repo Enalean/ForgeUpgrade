@@ -20,30 +20,37 @@
 
 require 'ForgeUpgradeBucketDb.php';
 require 'ForgeUpgradeBucketFilter.php';
+require 'ForgeUpgradeDb.php';
 
 /**
  * Centralize upgrade of the Forge
  */
 class ForgeUpgrade {
     /**
-     * @var ForgeUpgradeBucketDb
+     * @var ForgeUpgradeDb
      */
     protected $db;
 
+    /**
+     * @var ForgeUpgradeBucketDb
+     */
+    protected $bucketDb;
+
+    /**
+     * @var Logger
+     */
     protected $log;
 
     protected $buckets = null;
 
-    const STATUS_SUCCESS = 1;
-    const STATUS_FAILURE = 2;
-    const STATUS_SKIP    = 3;
 
     /**
      * Constructor
      */
     public function __construct(PDO $dbh) {
-        $this->db  = new ForgeUpgradeBucketDb($dbh);
-        $this->log = Logger::getLogger('ForgeUpgrade');
+        $this->db       = new ForgeUpgradeDb($dbh);
+        $this->bucketDb = new ForgeUpgradeBucketDb($dbh);
+        $this->log      = Logger::getLogger('ForgeUpgrade');
     }
 
     /**
@@ -113,7 +120,7 @@ class ForgeUpgrade {
                     $bucket->preUp();
                     $this->log->info("[Up] $className PreUp OK");
                     $bucket->up();
-                    $this->logUpgrade($bucket, self::STATUS_SUCCESS);
+                    $this->db->logUpgrade($bucket, ForgeUpgradeDb::STATUS_SUCCESS);
                     $this->log->info("[Up] $className Up OK");
                     $bucket->postUp();
                     $this->log->info("[Up] $className Done");
@@ -125,15 +132,9 @@ class ForgeUpgrade {
         }
     }
 
-    protected function logUpgrade(ForgeUpgradeBucket $bucket, $status) {
-        $sth = $this->db->dbh->prepare('INSERT INTO forge_upgrade_logs (script, date, status, log) VALUES (?, NOW(), ?, ?)');
-        $sth->execute(array($bucket->getPath(), $status, ''));
-    }
-
     protected function getMigrationBuckets($dirPath) {
         $buckets = $this->getAllMigrationBuckets($dirPath);
-        $sth = $this->db->dbh->prepare('SELECT * FROM forge_upgrade_logs');
-        $sth->execute();
+        $sth = $this->db->getAllBuckets();
         foreach($sth as $row) {
             $key = basename($row['script']);
             if (isset($buckets[$key])) {
@@ -169,7 +170,7 @@ class ForgeUpgrade {
             include $scriptPath->getPathname();
         }
         if ($class != '' && class_exists($class)) {
-            $bucket = new $class($this->db);
+            $bucket = new $class($this->bucketDb);
             $bucket->setPath($scriptPath->getPathname());
         }
         return $bucket;

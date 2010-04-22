@@ -1,4 +1,4 @@
-CREATE TABLE `forge_upgrade_logs` (
+CREATE TABLE `forge_upgrade_bucket` (
     id INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
     script VARCHAR(255) NOT NULL default '',
     date DATETIME DEFAULT '0000-00-00 00:00:00' NOT NULL,
