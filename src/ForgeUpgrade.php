@@ -56,14 +56,29 @@ class ForgeUpgrade {
     /**
      * Run all available migrations
      */
-    public function run() {
+    public function run($options) {
         $buckets = $this->getMigrationBuckets('migrations');
         if (count($buckets) > 0) {
-            if ($this->runPreUp($buckets)) {
-                $this->runUp($buckets);
+            if ($options['record-only']) {
+                $this->doRecordOnly($buckets);
+            } else {
+                $this->doMigrations($buckets);
             }
         } else {
             $this->log->info('System up-to-date');
+        }
+    }
+
+    protected function doRecordOnly($buckets) {
+        foreach ($buckets as $bucket) {
+            $this->log->info("[doRecordOnly] ".get_class($bucket));
+            $this->db->logUpgrade($bucket, ForgeUpgradeDb::STATUS_SKIP);
+        }
+    }
+    
+    protected function doMigrations($buckets) {
+        if ($this->runPreUp($buckets)) {
+            $this->runUp($buckets);
         }
     }
 
@@ -78,9 +93,8 @@ class ForgeUpgrade {
     public function runPreUp($buckets) {
         $this->log->info("[Pre Up] Run pre up checks");
         $result = true;
-        foreach ($buckets as $file) {
+        foreach ($buckets as $bucket) {
             try {
-                $bucket = $this->getMigrationClass($file);
                 if (!$bucket->dependsOn()) {
                     $bucket->preUp();
                     $this->log->info("[Pre Up] OK : ".get_class($bucket));
@@ -111,20 +125,17 @@ class ForgeUpgrade {
     protected function runUp($buckets) {
         try {
             $this->log->info('[Up] Start running migrations...');
-            foreach ($buckets as $file) {
-                $bucket = $this->getMigrationClass($file);
-                if ($bucket) {
-                    $className = get_class($bucket);
-                    $this->log->info("[Up] $className");
-                    echo $bucket->description();
-                    $bucket->preUp();
-                    $this->log->info("[Up] $className PreUp OK");
-                    $bucket->up();
-                    $this->db->logUpgrade($bucket, ForgeUpgradeDb::STATUS_SUCCESS);
-                    $this->log->info("[Up] $className Up OK");
-                    $bucket->postUp();
-                    $this->log->info("[Up] $className Done");
-                }
+            foreach ($buckets as $bucket) {
+                $className = get_class($bucket);
+                $this->log->info("[Up] $className");
+                echo $bucket->description();
+                $bucket->preUp();
+                $this->log->info("[Up] $className PreUp OK");
+                $bucket->up();
+                $this->db->logUpgrade($bucket, ForgeUpgradeDb::STATUS_SUCCESS);
+                $this->log->info("[Up] $className Up OK");
+                $bucket->postUp();
+                $this->log->info("[Up] $className Done");
             }
         } catch (Exception $e) {
             $this->log->error("[Up] ".$e->getMessage());
@@ -156,7 +167,10 @@ class ForgeUpgrade {
             $files  = new UpgradeBucketFilter($iter);
             $this->buckets = array();
             foreach ($files as $file) {
-                $this->buckets[basename($file->getPathname())] = $file;
+                $object = $this->getMigrationClass($file);
+                if ($object) {
+                    $this->buckets[basename($file->getPathname())] = $object;
+                }
             }
             ksort($this->buckets, SORT_STRING);
         }
