@@ -121,11 +121,14 @@ class ForgeUpgradeBucketDb {
      * Delete table if exists and report errors.
      *
      * @param String             $tableName Table name
-     * @param String             $sql       The delete table statement
+     * @param String             $sql       The delete table statement (optionnal)
      */
-    public function deleteTable($tableName, $sql) {
+    public function dropTable($tableName, $sql='') {
         $this->log->info('Delete table '.$tableName);
         if ($this->tableNameExists($tableName)) {
+            if (!$sql) {
+                $sql = 'DROP TABLE `'.$tableName.'`';
+            }
             $res = $this->dbh->exec($sql);
             if ($res === false) {
                 $info = $this->dbh->errorInfo();

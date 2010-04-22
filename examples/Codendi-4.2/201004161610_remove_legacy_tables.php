@@ -18,17 +18,14 @@ EOT;
 
     
     public function up() {
-        $sql = 'DROP TABLE support_messages';
-        $this->db->deleteTable('support_messages', $sql);
+        $this->db->dropTable('support_messages');
         
-        $sql = 'DROP TABLE bug_cc';
-        $this->db->deleteTable('bug_cc', $sql);
+        $this->db->dropTable('bug_cc');
 
-        $sql = 'DROP TABLE project_cc:';
-        $this->db->deleteTable('project_cc', $sql);
+        $this->db->dropTable('project_cc');
 
         $sql = 'DROP TABLE frs_status';
-        $this->db->deleteTable('frs_status', $sql);
+        $this->db->dropTable('frs_status', $sql);
 
     }
     
