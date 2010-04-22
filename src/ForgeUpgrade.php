@@ -18,6 +18,7 @@
  * along with ForgeUpgrade. If not, see <http://www.gnu.org/licenses/>.
  */
 
+require 'ForgeUpgradeBucket.php';
 require 'ForgeUpgradeBucketDb.php';
 require 'ForgeUpgradeBucketFilter.php';
 require 'ForgeUpgradeDb.php';
@@ -56,8 +57,12 @@ class ForgeUpgrade {
     /**
      * Run all available migrations
      */
-    public function run($func) {
-        $buckets = $this->getMigrationBuckets('migrations');
+    public function run($func, $paths) {
+        if (count($paths) == 0) {
+            $this->log->info('No migration path');
+            return false;
+        }
+        $buckets = $this->getMigrationBuckets($paths[0]);
         if (count($buckets) > 0) {
             switch ($func) {
                 case 'record-only':
@@ -171,6 +176,7 @@ class ForgeUpgrade {
     }
 
     protected function getMigrationBuckets($dirPath) {
+        $this->log->info("Find buckets in $dirPath");
         $buckets = $this->getAllMigrationBuckets($dirPath);
         $sth = $this->db->getAllBuckets();
         foreach($sth as $row) {

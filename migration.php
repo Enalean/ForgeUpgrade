@@ -29,12 +29,23 @@ require 'src/ForgeUpgrade.php';
 require 'lib/log4php/Logger.php';
 
 // Parameters
-$func = 'help';
+$func  = 'help';
+$paths = array();
 for ($i = 1; $i < $argc; $i++) {
     switch ($argv[$i]) {
-        default:
+        case '--record-only':
+        case '--update':
+        case '--check-update':
+        case '--run-pre':
             $func = substr($argv[$i], 2, strlen($argv[$i]));
             break;
+    }
+    if (preg_match('/--path=(.*)/',$argv[$i], $matches)) {
+        if (is_dir($matches[1])) {
+            $paths[] = $matches[1];
+        } else {
+            echo 'Error "'.$matches[1].'" is not a valid directory'.PHP_EOL;
+        }
     }
 }
 
@@ -54,7 +65,7 @@ try {
                    array(PDO::MYSQL_ATTR_INIT_COMMAND =>  'SET NAMES \'UTF8\''));
 
     $upg = new ForgeUpgrade($dbh);
-    $upg->run($func);
+    $upg->run($func, $paths);
 } catch (PDOException $e) {
     echo 'Connection faild: '.$e->getMessage().PHP_EOL;
 }

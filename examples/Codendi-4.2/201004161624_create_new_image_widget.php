@@ -1,6 +1,6 @@
 <?php
 
-require_once dirname(__FILE__).'/../src/ForgeUpgradeBucket.php';
+//require_once dirname(__FILE__).'/../src/ForgeUpgradeBucket.php';
 
 /**
  *
