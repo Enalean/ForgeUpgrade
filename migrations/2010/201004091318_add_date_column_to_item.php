@@ -19,7 +19,7 @@ EOT;
     }
 
     public function preUp() {
-        return $this->db->tableExists('plugin_docmanwatermark_item_excluded');
+        return $this->db->tableNameExists('plugin_docmanwatermark_item_excluded');
     }
 
     public function up() {

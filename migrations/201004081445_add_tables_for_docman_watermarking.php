@@ -31,10 +31,10 @@ EOT;
 
     public function postUp() {
         // This 2 checks could be automated with $this->db->createTable
-        if (!$this->db->tableExists('plugin_docmanwatermark_item_excluded')) {
+        if (!$this->db->tableNameExists('plugin_docmanwatermark_item_excluded')) {
             throw new ForgeUpgradeBucketUpgradeNotCompleteException('plugin_docmanwatermark_item_excluded table is missing');
         }
-        if (!$this->db->tableExists('plugin_docmanwatermark_item_excluded_log')) {
+        if (!$this->db->tableNameExists('plugin_docmanwatermark_item_excluded_log')) {
             throw new ForgeUpgradeBucketUpgradeNotCompleteException('plugin_docmanwatermark_item_excluded_log table is missing');
         }
     }

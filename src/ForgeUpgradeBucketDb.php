@@ -40,13 +40,13 @@ class ForgeUpgradeBucketDb {
     }
 
     /**
-     * Return true if the given table already exists into the database
+     * Return true if the given table name already exists into the database
      *
      * @param String $tableName Table name
      *
      * @return Boolean
      */
-    public function tableExists($tableName) {
+    public function tableNameExists($tableName) {
         $sql = 'SHOW TABLES LIKE '.$this->dbh->quote($tableName);
         $res = $this->dbh->query($sql);
         if ($res && $res->fetch() !== false) {
@@ -57,15 +57,15 @@ class ForgeUpgradeBucketDb {
     }
 
     /**
-     * Return true if the given index on the table already exists into the database
+     * Return true if the given column name already exists into the database
      *
-     * @param String $tableName Table name 
-     * @param String $index     Index
+     * @param String $tableName  Table name
+     * @param String $columnName Column name
      *
      * @return Boolean
      */
-    public function indexExists($tableName, $index) {
-        $sql = 'SHOW INDEX FROM '.$tableName.' WHERE Key_name LIKE '.$this->dbh->quote($index);
+    public function columnNameExists($tableName, $columnName) {
+        $sql = 'SHOW COLUMNS FROM `'.$tableName.'` LIKE '.$this->dbh->quote($columnName);
         $res = $this->dbh->query($sql);
         if ($res && $res->fetch() !== false) {
             return true;
@@ -73,6 +73,25 @@ class ForgeUpgradeBucketDb {
             return false;
         }
     }
+
+    /**
+     * Return true if the given index name on the table already exists into the database
+     *
+     * @param String $tableName Table name 
+     * @param String $index     Index
+     *
+     * @return Boolean
+     */
+    public function indexNameExists($tableName, $index) {
+        $sql = 'SHOW INDEX FROM '.$this->dbh->quote($tableName).' WHERE Key_name LIKE '.$this->dbh->quote($index);
+        $res = $this->dbh->query($sql);
+        if ($res && $res->fetch() !== false) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     /**
      * Create new table
      *
@@ -83,7 +102,7 @@ class ForgeUpgradeBucketDb {
      */
     public function createTable($tableName, $sql) {
         $this->log->info('Add table '.$tableName);
-        if (!$this->tableExists($tableName)) {
+        if (!$this->tableNameExists($tableName)) {
             $res = $this->dbh->exec($sql);
             if ($res === false) {
                 $info = $this->dbh->errorInfo();
@@ -106,7 +125,7 @@ class ForgeUpgradeBucketDb {
      */
     public function deleteTable($tableName, $sql) {
         $this->log->info('Delete table '.$tableName);
-        if ($this->tableExists($tableName)) {
+        if ($this->tableNameExists($tableName)) {
             $res = $this->dbh->exec($sql);
             if ($res === false) {
                 $info = $this->dbh->errorInfo();
@@ -129,7 +148,7 @@ class ForgeUpgradeBucketDb {
      */
     public function addIndex($tableName, $index, $sql) {
         $this->log->info('Add index '.$tableName);
-        if (!$this->indexExists($tableName, $index)) {
+        if (!$this->indexNameExists($tableName, $index)) {
             $res = $this->dbh->exec($sql);
             if ($res === false) {
                 $info = $this->dbh->errorInfo();

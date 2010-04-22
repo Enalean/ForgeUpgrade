@@ -24,10 +24,10 @@ EOT;
     }
     
     public function postUp() {
-        if (!$this->db->indexExists('priority_plugin_hook', 'idx_plugin_id')) {
+        if (!$this->db->indexNameExists('priority_plugin_hook', 'idx_plugin_id')) {
             throw new ForgeUpgradeBucketUpgradeNotCompleteException('idx_plugin_id has not been created on priority_plugin_hook');
         }
-        if (!$this->db->indexExists('plugin', 'idx_available')) {
+        if (!$this->db->indexNameExists('plugin', 'idx_available')) {
             throw new ForgeUpgradeBucketUpgradeNotCompleteException('idx_available has not been created on plugin');
         }
         

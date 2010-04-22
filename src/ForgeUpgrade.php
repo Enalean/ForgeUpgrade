@@ -50,19 +50,31 @@ class ForgeUpgrade {
     public function __construct(PDO $dbh) {
         $this->db       = new ForgeUpgradeDb($dbh);
         $this->bucketDb = new ForgeUpgradeBucketDb($dbh);
-        $this->log      = Logger::getLogger('ForgeUpgrade');
+        $this->log      = $this->getLogger('ForgeUpgrade');
     }
 
     /**
      * Run all available migrations
      */
-    public function run($options) {
+    public function run($func) {
         $buckets = $this->getMigrationBuckets('migrations');
         if (count($buckets) > 0) {
-            if ($options['record-only']) {
-                $this->doRecordOnly($buckets);
-            } else {
-                $this->doMigrations($buckets);
+            switch ($func) {
+                case 'record-only':
+                    $this->doRecordOnly($buckets);
+                    break;
+
+                case 'update':
+                    $this->doUpdate($buckets);
+                    break;
+
+                case 'check-update':
+                    $this->doCheckUpdate($buckets);
+                    break;
+
+                case 'run-pre':
+                    $this->runPreUp($buckets);
+                    break;
             }
         } else {
             $this->log->info('System up-to-date');
@@ -76,10 +88,21 @@ class ForgeUpgrade {
         }
     }
     
-    protected function doMigrations($buckets) {
+    protected function doUpdate($buckets) {
         if ($this->runPreUp($buckets)) {
             $this->runUp($buckets);
         }
+    }
+
+    protected function doCheckUpdate($buckets) {
+        foreach ($buckets as $bucket) {
+            echo get_class($bucket).' ('.$bucket->getPath().')'.PHP_EOL;
+            $lines = explode("\n", $bucket->description());
+            foreach ($lines as $line) {
+                echo "\t$line\n";
+            }
+        }
+        echo count($buckets)." migrations pending\n";
     }
 
     /**
@@ -127,19 +150,23 @@ class ForgeUpgrade {
             $this->log->info('[Up] Start running migrations...');
             foreach ($buckets as $bucket) {
                 $className = get_class($bucket);
+
                 $this->log->info("[Up] $className");
                 echo $bucket->description();
+
                 $bucket->preUp();
                 $this->log->info("[Up] $className PreUp OK");
+
                 $bucket->up();
                 $this->db->logUpgrade($bucket, ForgeUpgradeDb::STATUS_SUCCESS);
                 $this->log->info("[Up] $className Up OK");
+
                 $bucket->postUp();
                 $this->log->info("[Up] $className Done");
             }
         } catch (Exception $e) {
             $this->log->error("[Up] ".$e->getMessage());
-            $this->logUpgrade($bucket, self::STATUS_FAILURE);
+            $this->logUpgrade($bucket, ForgeUpgradeDb::STATUS_FAILURE);
         }
     }
 
@@ -206,6 +233,15 @@ class ForgeUpgrade {
             return implode('', $capWords);
         }
         return '';
+    }
+
+    /**
+     * Wrapper for Logger
+     *
+     * @return Logger
+     */
+    protected function getLogger() {
+        return Logger::getLogger('ForgeUpgrade');
     }
 }
 

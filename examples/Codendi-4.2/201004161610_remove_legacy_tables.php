@@ -33,16 +33,16 @@ EOT;
     }
     
     public function postUp() {
-        if ($this->db->tableExists('support_messages')) {
+        if ($this->db->tableNameExists('support_messages')) {
             throw new ForgeUpgradeBucketUpgradeNotCompleteException('support_messages still exist');
         }
-        if ($this->db->tableExists('bug_cc')) {
+        if ($this->db->tableNameExists('bug_cc')) {
             throw new ForgeUpgradeBucketUpgradeNotCompleteException('bug_cc still exist');
         }
-        if ($this->db->tableExists('project_cc')) {
+        if ($this->db->tableNameExists('project_cc')) {
             throw new ForgeUpgradeBucketUpgradeNotCompleteException('project_cc still exist');
         }
-        if ($this->db->tableExists('frs_status')) {
+        if ($this->db->tableNameExists('frs_status')) {
             throw new ForgeUpgradeBucketUpgradeNotCompleteException('bug_cc still exist');
         }
     }

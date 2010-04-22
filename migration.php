@@ -29,13 +29,16 @@ require 'src/ForgeUpgrade.php';
 require 'lib/log4php/Logger.php';
 
 // Parameters
-$options = array();
+$func = 'help';
 for ($i = 1; $i < $argc; $i++) {
-    if ($argv[$i] == "--record-only") {
-        $options['record-only'] = true;
+    switch ($argv[$i]) {
+        default:
+            $func = substr($argv[$i], 2, strlen($argv[$i]));
+            break;
     }
 }
 
+// Go
 try {
     if (strpos($GLOBALS['sys_dbhost'], ':') !== false) {
         list($host, $socket) = explode(':', $GLOBALS['sys_dbhost']);
@@ -51,8 +54,7 @@ try {
                    array(PDO::MYSQL_ATTR_INIT_COMMAND =>  'SET NAMES \'UTF8\''));
 
     $upg = new ForgeUpgrade($dbh);
-    $upg->run($options);
-
+    $upg->run($func);
 } catch (PDOException $e) {
     echo 'Connection faild: '.$e->getMessage().PHP_EOL;
 }
