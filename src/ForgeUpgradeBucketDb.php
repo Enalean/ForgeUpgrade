@@ -18,13 +18,13 @@
  * along with ForgeUpgrade. If not, see <http://www.gnu.org/licenses/>.
  */
 
-require 'ForgeUpgradeDbException.php';
+require 'ForgeUpgradeBucketDbException.php';
 
 /**
  * Wrap accesss to the DB and provide a set of convenient tools to write
  * DB upgrades
  */
-class ForgeUpgradeDb {
+class ForgeUpgradeBucketDb {
     public $dbh;
 
     protected $log;
@@ -88,7 +88,7 @@ class ForgeUpgradeDb {
             if ($res === false) {
                 $info = $this->dbh->errorInfo();
                 $this->log->error('An error occured adding table '.$tableName.': '.$info[2].' ('.$info[1].' - '.$info[0].')');
-                throw new ForgeUpgradeDbException($msg);
+                throw new ForgeUpgradeBucketDbException($msg);
             }
             $this->log->info($tableName.' successfully added');
         } else {
@@ -111,7 +111,7 @@ class ForgeUpgradeDb {
             if ($res === false) {
                 $info = $this->dbh->errorInfo();
                 $this->log->error('An error occured deleting table '.$tableName.': '.$info[2].' ('.$info[1].' - '.$info[0].')');
-                throw new ForgeUpgradeDbException($msg);
+                throw new ForgeUpgradeBucketDbException($msg);
             }
             $this->log->info($tableName.' successfully deleted');
         } else {
@@ -134,7 +134,7 @@ class ForgeUpgradeDb {
             if ($res === false) {
                 $info = $this->dbh->errorInfo();
                 $this->log->error('An error occured adding index to '.$tableName.': '.$info[2].' ('.$info[1].' - '.$info[0].')');
-                throw new ForgeUpgradeDbException($msg);
+                throw new ForgeUpgradeBucketDbException($msg);
             }
             $this->log->info($index.' successfully added index');
         } else {

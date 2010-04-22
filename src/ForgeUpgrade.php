@@ -18,7 +18,7 @@
  * along with ForgeUpgrade. If not, see <http://www.gnu.org/licenses/>.
  */
 
-require 'ForgeUpgradeDb.php';
+require 'ForgeUpgradeBucketDb.php';
 require 'ForgeUpgradeBucketFilter.php';
 
 /**
@@ -26,7 +26,7 @@ require 'ForgeUpgradeBucketFilter.php';
  */
 class ForgeUpgrade {
     /**
-     * @var ForgeUpgradeDb
+     * @var ForgeUpgradeBucketDb
      */
     protected $db;
 
@@ -42,7 +42,7 @@ class ForgeUpgrade {
      * Constructor
      */
     public function __construct(PDO $dbh) {
-        $this->db  = new ForgeUpgradeDb($dbh);
+        $this->db  = new ForgeUpgradeBucketDb($dbh);
         $this->log = Logger::getLogger('ForgeUpgrade');
     }
 
