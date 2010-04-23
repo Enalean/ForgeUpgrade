@@ -29,8 +29,10 @@ require 'src/ForgeUpgrade.php';
 require 'lib/log4php/Logger.php';
 
 // Parameters
-$func  = 'help';
-$paths = array();
+$func         = 'help';
+$paths        = array();
+$includePaths = array();
+$excludePaths = array();
 for ($i = 1; $i < $argc; $i++) {
     switch ($argv[$i]) {
         case '--record-only':
@@ -46,6 +48,36 @@ for ($i = 1; $i < $argc; $i++) {
         } else {
             echo 'Error "'.$matches[1].'" is not a valid directory'.PHP_EOL;
         }
+    }
+    
+    if (preg_match('/--include=(.*)/',$argv[$i], $matches)) {
+        if (strpos($matches[1], '/') === false) {
+            $matches[1] = '/'.$matches[1].'/';
+        } else {
+            var_dump(strpos($matches[1], '/'));
+            if (strpos($matches[1], '/') !== 0) {
+                $matches[1] = '/'.$matches[1];
+            }
+            if (strrpos($matches[1], '/') !== (strlen($matches[1]) - 1)) {
+                $matches[1] = $matches[1].'/';
+            }
+        }
+        $includePaths[] = $matches[1];
+    }
+    
+    if (preg_match('/--exclude=(.*)/',$argv[$i], $matches)) {
+        if (strpos($matches[1], '/') === false) {
+            $matches[1] = '/'.$matches[1].'/';
+        } else {
+            var_dump(strpos($matches[1], '/'));
+            if (strpos($matches[1], '/') !== 0) {
+                $matches[1] = '/'.$matches[1];
+            }
+            if (strrpos($matches[1], '/') !== (strlen($matches[1]) - 1)) {
+                $matches[1] = $matches[1].'/';
+            }
+        }
+        $excludePaths[] = $matches[1];
     }
 }
 
@@ -65,6 +97,8 @@ try {
                    array(PDO::MYSQL_ATTR_INIT_COMMAND =>  'SET NAMES \'UTF8\''));
 
     $upg = new ForgeUpgrade($dbh);
+    $upg->setIncludePaths($includePaths);
+    $upg->setExcludePaths($excludePaths);
     $upg->run($func, $paths);
 } catch (PDOException $e) {
     echo 'Connection faild: '.$e->getMessage().PHP_EOL;

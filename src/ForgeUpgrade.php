@@ -42,8 +42,13 @@ class ForgeUpgrade {
      */
     protected $log;
 
+    /**
+     * @var array
+     */
     protected $buckets = null;
 
+    protected $includePaths = array();
+    protected $excludePaths = array();
 
     /**
      * Constructor
@@ -51,15 +56,22 @@ class ForgeUpgrade {
     public function __construct(PDO $dbh) {
         $this->db       = new ForgeUpgradeDb($dbh);
         $this->bucketDb = new ForgeUpgradeBucketDb($dbh);
-        $this->log      = $this->getLogger('ForgeUpgrade');
     }
 
+    function setIncludePaths($paths) {
+        $this->includePaths = $paths;
+    }
+
+    function setExcludePaths($paths) {
+        $this->excludePaths = $paths;
+    }
+    
     /**
      * Run all available migrations
      */
     public function run($func, $paths) {
         if (count($paths) == 0) {
-            $this->log->info('No migration path');
+            $this->log()->info('No migration path');
             return false;
         }
         $buckets = $this->getMigrationBuckets($paths[0]);
@@ -82,13 +94,13 @@ class ForgeUpgrade {
                     break;
             }
         } else {
-            $this->log->info('System up-to-date');
+            $this->log()->info('System up-to-date');
         }
     }
 
     protected function doRecordOnly($buckets) {
         foreach ($buckets as $bucket) {
-            $this->log->info("[doRecordOnly] ".get_class($bucket));
+            $this->log()->info("[doRecordOnly] ".get_class($bucket));
             $this->db->logUpgrade($bucket, ForgeUpgradeDb::STATUS_SKIP);
         }
     }
@@ -119,25 +131,25 @@ class ForgeUpgrade {
      * @todo: Add info on the number of buckets Success, Faild, Skipped
      */
     public function runPreUp($buckets) {
-        $this->log->info("[Pre Up] Run pre up checks");
+        $this->log()->info("[Pre Up] Run pre up checks");
         $result = true;
         foreach ($buckets as $bucket) {
             try {
                 if (!$bucket->dependsOn()) {
                     $bucket->preUp();
-                    $this->log->info("[Pre Up] OK : ".get_class($bucket));
+                    $this->log()->info("[Pre Up] OK : ".get_class($bucket));
                 } else {
-                    $this->log->info("[Pre Up] SKIP: ".get_class($bucket)." depends on a migration not already applied");
+                    $this->log()->info("[Pre Up] SKIP: ".get_class($bucket)." depends on a migration not already applied");
                 }
             } catch (Exception $e) {
-                $this->log->error("[Pre Up] ERROR : ".get_class($bucket));
+                $this->log()->error("[Pre Up] ERROR : ".get_class($bucket));
                 $result = false;
             }
         }
         if ($result) {
-            $this->log->info("[Pre Up] Global: OK");
+            $this->log()->info("[Pre Up] Global: OK");
         } else {
-            $this->log->error("[Pre Up] Global: FAILD");
+            $this->log()->error("[Pre Up] Global: FAILD");
         }
 
         return $result;
@@ -152,31 +164,31 @@ class ForgeUpgrade {
      */
     protected function runUp($buckets) {
         try {
-            $this->log->info('[Up] Start running migrations...');
+            $this->log()->info('[Up] Start running migrations...');
             foreach ($buckets as $bucket) {
                 $className = get_class($bucket);
 
-                $this->log->info("[Up] $className");
+                $this->log()->info("[Up] $className");
                 echo $bucket->description();
 
                 $bucket->preUp();
-                $this->log->info("[Up] $className PreUp OK");
+                $this->log()->info("[Up] $className PreUp OK");
 
                 $bucket->up();
                 $this->db->logUpgrade($bucket, ForgeUpgradeDb::STATUS_SUCCESS);
-                $this->log->info("[Up] $className Up OK");
+                $this->log()->info("[Up] $className Up OK");
 
                 $bucket->postUp();
-                $this->log->info("[Up] $className Done");
+                $this->log()->info("[Up] $className Done");
             }
         } catch (Exception $e) {
-            $this->log->error("[Up] ".$e->getMessage());
-            $this->logUpgrade($bucket, ForgeUpgradeDb::STATUS_FAILURE);
+            $this->log()->error("[Up] ".$e->getMessage());
+            $this->db->logUpgrade($bucket, ForgeUpgradeDb::STATUS_FAILURE);
         }
     }
 
     protected function getMigrationBuckets($dirPath) {
-        $this->log->info("Find buckets in $dirPath");
+        $this->log()->info("Find buckets in $dirPath");
         $buckets = $this->getAllMigrationBuckets($dirPath);
         $sth = $this->db->getAllBuckets();
         foreach($sth as $row) {
@@ -193,16 +205,24 @@ class ForgeUpgrade {
      *
      * @return Array of SplFileInfo
      */
-    protected function getAllMigrationBuckets($dirPath) {
+    public function getAllMigrationBuckets($dirPath) {
         if (!isset($this->buckets)) {
-            $dir    = new RecursiveDirectoryIterator($dirPath);
-            $iter   = new RecursiveIteratorIterator($dir);
-            $files  = new UpgradeBucketFilter($iter);
+            $iter = new RecursiveDirectoryIterator($dirPath);
+            $iter = new RecursiveIteratorIterator($iter, RecursiveIteratorIterator::SELF_FIRST);
+            $iter = new UpgradeBucketFilter($iter);
+            $iter->setIncludePaths($this->includePaths);
+            $iter->setExcludePaths($this->excludePaths);
+            
             $this->buckets = array();
-            foreach ($files as $file) {
-                $object = $this->getMigrationClass($file);
-                if ($object) {
-                    $this->buckets[basename($file->getPathname())] = $object;
+            foreach ($iter as $file) {
+                //var_dump($file->getPathname());
+                $this->log()->debug("Found file $file");
+                if ($file->isFile()) {
+                    $object = $this->getMigrationClass($file);
+                    if ($object) {
+                        //$this->log()->debug("Add $file as new bucket");
+                        $this->buckets[basename($file->getPathname())] = $object;
+                    }
                 }
             }
             ksort($this->buckets, SORT_STRING);
@@ -246,10 +266,16 @@ class ForgeUpgrade {
      *
      * @return Logger
      */
-    protected function getLogger() {
-        return Logger::getLogger('ForgeUpgrade');
+    protected function log() {
+        if (!$this->log) {
+            $this->log = Logger::getLogger('ForgeUpgrade');
+        }
+        return $this->log;
+    }
+    
+    public function setLogger(Logger $log) {
+        $this->log = $log;
     }
 }
-
 
 ?>

@@ -10,11 +10,11 @@ $name = $argv[$argc - 1];
 
 $filename = date('YmdHi', $_SERVER['REQUEST_TIME']).'_'.unCapitalize($name).'.php';
 
-$tmpl = file_get_contents('templates/DefaultBucket.tmpl.php');
+$tmpl = file_get_contents(dirname(__FILE__).'/templates/DefaultBucket.tmpl.php');
 $tmpl = preg_replace('/%className%/', $name, $tmpl);
 
 // Directory
-$dir = 'migrations/'.date('Y', $_SERVER['REQUEST_TIME']);
+$dir = date('Y', $_SERVER['REQUEST_TIME']);
 if (!is_dir($dir)) {
     mkdir($dir);
 }

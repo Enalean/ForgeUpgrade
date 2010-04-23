@@ -25,13 +25,44 @@
  */
 class UpgradeBucketFilter extends FilterIterator {
 
+    protected $includePaths = array();
+    protected $excludePaths = array();
+    
+    public function addExclude($path) {
+        $this->excludePaths[] = $path;
+    }
+    
+    public function addInclude($path) {
+        $this->includePaths[] = $path;
+    }
+
+    function setIncludePaths($paths) {
+        $this->includePaths = $paths;
+    }
+
+    function setExcludePaths($paths) {
+        $this->excludePaths = $paths;
+    }
+    
     /**
      * Match php upgrade scripts
      *
      * @return Boolean
      */
     public function accept() {
-        return preg_match('%^[0-9]+_(.*)\.php$%', basename(parent::current()));
+        $filePath = parent::current()->getPathname();
+
+        $match = true;
+        foreach($this->includePaths as $path) {
+            $match &= (strpos($filePath, $path) !== false);
+        }
+
+        foreach($this->excludePaths as $path) {
+            $match &= !(strpos($filePath, $path) !== false);
+        }
+
+        $match &= preg_match('%^[0-9]+_(.*)\.php$%', basename($filePath));
+        return $match;
     }
 
 }

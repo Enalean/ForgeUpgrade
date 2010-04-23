@@ -1,0 +1,83 @@
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svnroot/simpletest/!svn/ver/1843/simpletest/trunk/packages/simpletest.org/test/package
+END
+content_without_section.xml
+K 25
+svn:wc:ra_dav:version-url
+V 115
+/svnroot/simpletest/!svn/ver/1620/simpletest/trunk/packages/simpletest.org/test/package/content_without_section.xml
+END
+one_section_with_php_code.xml
+K 25
+svn:wc:ra_dav:version-url
+V 117
+/svnroot/simpletest/!svn/ver/1620/simpletest/trunk/packages/simpletest.org/test/package/one_section_with_php_code.xml
+END
+one_section_with_autorum_php.xml
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/svnroot/simpletest/!svn/ver/1682/simpletest/trunk/packages/simpletest.org/test/package/one_section_with_autorum_php.xml
+END
+here_unit-tester.xml
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/svnroot/simpletest/!svn/ver/1620/simpletest/trunk/packages/simpletest.org/test/package/here_unit-tester.xml
+END
+script_and_ul.xml
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svnroot/simpletest/!svn/ver/1843/simpletest/trunk/packages/simpletest.org/test/package/script_and_ul.xml
+END
+one_section_milestoned.xml
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/svnroot/simpletest/!svn/ver/1795/simpletest/trunk/packages/simpletest.org/test/package/one_section_milestoned.xml
+END
+here_overview.xml
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svnroot/simpletest/!svn/ver/1620/simpletest/trunk/packages/simpletest.org/test/package/here_overview.xml
+END
+here_download.xml
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svnroot/simpletest/!svn/ver/1620/simpletest/trunk/packages/simpletest.org/test/package/here_download.xml
+END
+here_simpletest.xml
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/svnroot/simpletest/!svn/ver/1620/simpletest/trunk/packages/simpletest.org/test/package/here_simpletest.xml
+END
+one_section_changelogged.xml
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/svnroot/simpletest/!svn/ver/1795/simpletest/trunk/packages/simpletest.org/test/package/one_section_changelogged.xml
+END
+here_start_testing.xml
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/svnroot/simpletest/!svn/ver/1620/simpletest/trunk/packages/simpletest.org/test/package/here_start_testing.xml
+END
+map.xml
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svnroot/simpletest/!svn/ver/1590/simpletest/trunk/packages/simpletest.org/test/package/map.xml
+END
+here_support.xml
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/svnroot/simpletest/!svn/ver/1620/simpletest/trunk/packages/simpletest.org/test/package/here_support.xml
+END

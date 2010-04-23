@@ -1,0 +1,275 @@
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svnroot/simpletest/!svn/ver/1995/simpletest/trunk
+END
+cookies.php
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svnroot/simpletest/!svn/ver/1784/simpletest/trunk/cookies.php
+END
+dumper.php
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svnroot/simpletest/!svn/ver/1909/simpletest/trunk/dumper.php
+END
+shell_tester.php
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svnroot/simpletest/!svn/ver/1786/simpletest/trunk/shell_tester.php
+END
+VERSION
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svnroot/simpletest/!svn/ver/1883/simpletest/trunk/VERSION
+END
+reporter.php
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svnroot/simpletest/!svn/ver/1995/simpletest/trunk/reporter.php
+END
+url.php
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svnroot/simpletest/!svn/ver/1829/simpletest/trunk/url.php
+END
+php_parser.php
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svnroot/simpletest/!svn/ver/1927/simpletest/trunk/php_parser.php
+END
+web_tester.php
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svnroot/simpletest/!svn/ver/1967/simpletest/trunk/web_tester.php
+END
+recorder.php
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svnroot/simpletest/!svn/ver/1982/simpletest/trunk/recorder.php
+END
+arguments.php
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svnroot/simpletest/!svn/ver/1994/simpletest/trunk/arguments.php
+END
+compatibility.php
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svnroot/simpletest/!svn/ver/1900/simpletest/trunk/compatibility.php
+END
+test_case.php
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svnroot/simpletest/!svn/ver/1968/simpletest/trunk/test_case.php
+END
+tag.php
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svnroot/simpletest/!svn/ver/1929/simpletest/trunk/tag.php
+END
+TODO.xml
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svnroot/simpletest/!svn/ver/1866/simpletest/trunk/TODO.xml
+END
+authentication.php
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svnroot/simpletest/!svn/ver/1784/simpletest/trunk/authentication.php
+END
+exceptions.php
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svnroot/simpletest/!svn/ver/1882/simpletest/trunk/exceptions.php
+END
+expectation.php
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svnroot/simpletest/!svn/ver/1905/simpletest/trunk/expectation.php
+END
+reflection_php4.php
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svnroot/simpletest/!svn/ver/1672/simpletest/trunk/reflection_php4.php
+END
+collector.php
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svnroot/simpletest/!svn/ver/1784/simpletest/trunk/collector.php
+END
+reflection_php5.php
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svnroot/simpletest/!svn/ver/1786/simpletest/trunk/reflection_php5.php
+END
+socket.php
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svnroot/simpletest/!svn/ver/1953/simpletest/trunk/socket.php
+END
+simpletest.php
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svnroot/simpletest/!svn/ver/1994/simpletest/trunk/simpletest.php
+END
+remote.php
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svnroot/simpletest/!svn/ver/1786/simpletest/trunk/remote.php
+END
+LICENSE
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svnroot/simpletest/!svn/ver/1590/simpletest/trunk/LICENSE
+END
+user_agent.php
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svnroot/simpletest/!svn/ver/1787/simpletest/trunk/user_agent.php
+END
+autorun.php
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svnroot/simpletest/!svn/ver/1885/simpletest/trunk/autorun.php
+END
+scorer.php
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svnroot/simpletest/!svn/ver/1982/simpletest/trunk/scorer.php
+END
+xml.php
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svnroot/simpletest/!svn/ver/1787/simpletest/trunk/xml.php
+END
+detached.php
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svnroot/simpletest/!svn/ver/1784/simpletest/trunk/detached.php
+END
+mock_objects.php
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svnroot/simpletest/!svn/ver/1973/simpletest/trunk/mock_objects.php
+END
+form.php
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svnroot/simpletest/!svn/ver/1916/simpletest/trunk/form.php
+END
+unit_tester.php
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svnroot/simpletest/!svn/ver/1882/simpletest/trunk/unit_tester.php
+END
+default_reporter.php
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svnroot/simpletest/!svn/ver/1995/simpletest/trunk/default_reporter.php
+END
+README
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svnroot/simpletest/!svn/ver/1835/simpletest/trunk/README
+END
+HELP_MY_TESTS_DONT_WORK_ANYMORE
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svnroot/simpletest/!svn/ver/1982/simpletest/trunk/HELP_MY_TESTS_DONT_WORK_ANYMORE
+END
+page.php
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svnroot/simpletest/!svn/ver/1938/simpletest/trunk/page.php
+END
+errors.php
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svnroot/simpletest/!svn/ver/1981/simpletest/trunk/errors.php
+END
+invoker.php
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svnroot/simpletest/!svn/ver/1785/simpletest/trunk/invoker.php
+END
+frames.php
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svnroot/simpletest/!svn/ver/1784/simpletest/trunk/frames.php
+END
+http.php
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svnroot/simpletest/!svn/ver/1829/simpletest/trunk/http.php
+END
+selector.php
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svnroot/simpletest/!svn/ver/1786/simpletest/trunk/selector.php
+END
+browser.php
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svnroot/simpletest/!svn/ver/1972/simpletest/trunk/browser.php
+END
+eclipse.php
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svnroot/simpletest/!svn/ver/1787/simpletest/trunk/eclipse.php
+END
+tidy_parser.php
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svnroot/simpletest/!svn/ver/1972/simpletest/trunk/tidy_parser.php
+END
+encoding.php
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svnroot/simpletest/!svn/ver/1964/simpletest/trunk/encoding.php
+END

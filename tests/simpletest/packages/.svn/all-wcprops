@@ -1,0 +1,107 @@
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svnroot/simpletest/!svn/ver/1971/simpletest/trunk/packages
+END
+package.xml
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svnroot/simpletest/!svn/ver/1911/simpletest/trunk/packages/package.xml
+END
+make_phpdoc_docs.sh
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svnroot/simpletest/!svn/ver/1665/simpletest/trunk/packages/make_phpdoc_docs.sh
+END
+make_bundled_docs.sh
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svnroot/simpletest/!svn/ver/1748/simpletest/trunk/packages/make_bundled_docs.sh
+END
+generate_package.php
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svnroot/simpletest/!svn/ver/1791/simpletest/trunk/packages/generate_package.php
+END
+transform_all_lastcraft.php
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svnroot/simpletest/!svn/ver/1683/simpletest/trunk/packages/transform_all_lastcraft.php
+END
+README
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svnroot/simpletest/!svn/ver/1590/simpletest/trunk/packages/README
+END
+site_map.xml
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svnroot/simpletest/!svn/ver/1590/simpletest/trunk/packages/site_map.xml
+END
+make_lastcraft_docs.sh
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svnroot/simpletest/!svn/ver/1665/simpletest/trunk/packages/make_lastcraft_docs.sh
+END
+simpletest.ini
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svnroot/simpletest/!svn/ver/1590/simpletest/trunk/packages/simpletest.ini
+END
+bundled_map.xml
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svnroot/simpletest/!svn/ver/1590/simpletest/trunk/packages/bundled_map.xml
+END
+build_tarball.sh
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svnroot/simpletest/!svn/ver/1920/simpletest/trunk/packages/build_tarball.sh
+END
+pear_package_create.php
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svnroot/simpletest/!svn/ver/1590/simpletest/trunk/packages/pear_package_create.php
+END
+extension.xml
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svnroot/simpletest/!svn/ver/1590/simpletest/trunk/packages/extension.xml
+END
+lastcraft.xslt
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svnroot/simpletest/!svn/ver/1590/simpletest/trunk/packages/lastcraft.xslt
+END
+generate_coverage.sh
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svnroot/simpletest/!svn/ver/1855/simpletest/trunk/packages/generate_coverage.sh
+END
+phpdoc_docs.xslt
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svnroot/simpletest/!svn/ver/1590/simpletest/trunk/packages/phpdoc_docs.xslt
+END
+bundled_docs.xslt
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svnroot/simpletest/!svn/ver/1798/simpletest/trunk/packages/bundled_docs.xslt
+END
