@@ -34,14 +34,22 @@ $paths        = array();
 $includePaths = array();
 $excludePaths = array();
 for ($i = 1; $i < $argc; $i++) {
+    //
+    // Commands
     switch ($argv[$i]) {
-        case '--record-only':
-        case '--update':
-        case '--check-update':
-        case '--run-pre':
-            $func = substr($argv[$i], 2, strlen($argv[$i]));
+        case 'help':
+        case 'record-only':
+        case 'update':
+        case 'check-update':
+        case 'run-pre':
+            $func = $argv[$i];
             break;
     }
+
+    //
+    // Options
+
+    // --path
     if (preg_match('/--path=(.*)/',$argv[$i], $matches)) {
         if (is_dir($matches[1])) {
             $paths[] = $matches[1];
@@ -49,36 +57,21 @@ for ($i = 1; $i < $argc; $i++) {
             echo 'Error "'.$matches[1].'" is not a valid directory'.PHP_EOL;
         }
     }
-    
+
+    // --include
     if (preg_match('/--include=(.*)/',$argv[$i], $matches)) {
-        if (strpos($matches[1], '/') === false) {
-            $matches[1] = '/'.$matches[1].'/';
-        } else {
-            var_dump(strpos($matches[1], '/'));
-            if (strpos($matches[1], '/') !== 0) {
-                $matches[1] = '/'.$matches[1];
-            }
-            if (strrpos($matches[1], '/') !== (strlen($matches[1]) - 1)) {
-                $matches[1] = $matches[1].'/';
-            }
-        }
-        $includePaths[] = $matches[1];
+        $includePaths[] = surroundBy($matches[1], '/');
     }
-    
+
+    // --exclude
     if (preg_match('/--exclude=(.*)/',$argv[$i], $matches)) {
-        if (strpos($matches[1], '/') === false) {
-            $matches[1] = '/'.$matches[1].'/';
-        } else {
-            var_dump(strpos($matches[1], '/'));
-            if (strpos($matches[1], '/') !== 0) {
-                $matches[1] = '/'.$matches[1];
-            }
-            if (strrpos($matches[1], '/') !== (strlen($matches[1]) - 1)) {
-                $matches[1] = $matches[1].'/';
-            }
-        }
-        $excludePaths[] = $matches[1];
+        $excludePaths[] = surroundBy($matches[1], '/');
     }
+}
+
+if ($func == 'help') {
+    usage();
+    exit;
 }
 
 // Go
@@ -102,6 +95,54 @@ try {
     $upg->run($func, $paths);
 } catch (PDOException $e) {
     echo 'Connection faild: '.$e->getMessage().PHP_EOL;
+}
+
+//
+// Function definitions
+//
+
+/**
+ * Print Help
+ */
+function usage() {
+    echo <<<EOT
+Usage: migration.php [options] command
+
+Commands:
+check-update  List all available migration buckets not already applied (pending)
+run-pre       Run pending migration buckets "pre" checks 
+update        Execute pending migration buckets
+record-only   Record all available buckets as executed in the database without
+              actually executing them
+
+Options:
+  --path=[/path]    Path where to find migration buckets [default: current dir]
+  --include=[/path] Only consider paths that contains given pattern
+  --exclude=[/path] Don't consider paths that contains given pattern
+
+EOT;
+}
+
+/**
+ * Surround a string by a char if not present
+ * 
+ * @param String $str  String to surround
+ * @param String $char Char to add
+ * 
+ * @return String
+ */
+function surroundBy($str, $char) {
+    if (strpos($str, $char) === false) {
+        $str = $char.$str.$char;
+    } else {
+        if (strpos($str, $char) !== 0) {
+            $str = $char.$str;
+        }
+        if (strrpos($str, $char) !== (strlen($str) - 1)) {
+            $str = $str.$char;
+        }
+    }
+    return $str;
 }
 
 ?>
