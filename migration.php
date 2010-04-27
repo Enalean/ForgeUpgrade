@@ -23,8 +23,8 @@
 ini_set('max_execution_time', 0);
 ini_set('memory_limit', -1);
 
-require getenv('CODENDI_LOCAL_INC') ? getenv('CODENDI_LOCAL_INC') : '/etc/codendi/conf/local.inc' ;
-require $GLOBALS['db_config_file'];
+ini_set('include_path', dirname(__FILE__).PATH_SEPARATOR.ini_get('include_path'));
+
 require 'src/ForgeUpgrade.php';
 require 'lib/log4php/Logger.php';
 
@@ -68,6 +68,25 @@ for ($i = 1; $i < $argc; $i++) {
     if (preg_match('/--exclude=(.*)/',$argv[$i], $matches)) {
         $excludePaths[] = surroundBy($matches[1], '/');
     }
+    
+    // --driver
+    if (preg_match('/--driver=(.*)/',$argv[$i], $matches)) {
+        // First try the file
+        if (is_file($matches[1])) {
+            require $matches[1];
+            $className = $matches[1];
+            $dbDriver = basename($matches[1], '.php');
+        } else {
+            $dbDriver = ucfirst(strtolower($matches[1]));
+            $filePath = 'driver/'.$dbDriver.'.php';
+            if (is_file($filePath)) {
+                require $filePath;
+                $dbDriver = 'ForgeUpgrade_Driver_'.$dbDriver;
+            } else {
+                echo "Error: invalid --driver".PHP_EOL;
+            }
+        }
+    }
 }
 
 if ($func == 'help') {
@@ -75,28 +94,19 @@ if ($func == 'help') {
     exit;
 }
 
-// Go
+// Get the DB connexion
 try {
-    if (strpos($GLOBALS['sys_dbhost'], ':') !== false) {
-        list($host, $socket) = explode(':', $GLOBALS['sys_dbhost']);
-        $socket = ';unix_socket='.$socket;
-    } else {
-        $host   = $GLOBALS['sys_dbhost'];
-        $socket = '';
-    }
-
-    $dbh = new PDO('mysql:host='.$host.$socket.';dbname='.$GLOBALS['sys_dbname'],
-                   $GLOBALS['sys_dbuser'],
-                   $GLOBALS['sys_dbpasswd'],
-                   array(PDO::MYSQL_ATTR_INIT_COMMAND =>  'SET NAMES \'UTF8\''));
-
-    $upg = new ForgeUpgrade($dbh);
-    $upg->setIncludePaths($includePaths);
-    $upg->setExcludePaths($excludePaths);
-    $upg->run($func, $paths);
+    $driver = new $dbDriver();
 } catch (PDOException $e) {
     echo 'Connection faild: '.$e->getMessage().PHP_EOL;
+    return -1;
 }
+
+// Go
+$upg = new ForgeUpgrade($driver->getPdo());
+$upg->setIncludePaths($includePaths);
+$upg->setExcludePaths($excludePaths);
+$upg->run($func, $paths);
 
 //
 // Function definitions
