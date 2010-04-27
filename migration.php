@@ -78,10 +78,10 @@ for ($i = 1; $i < $argc; $i++) {
             $dbDriver = basename($matches[1], '.php');
         } else {
             $dbDriver = ucfirst(strtolower($matches[1]));
-            $filePath = 'driver/'.$dbDriver.'.php';
+            $filePath = 'src/db/driver/'.$dbDriver.'.php';
             if (is_file($filePath)) {
                 require $filePath;
-                $dbDriver = 'ForgeUpgrade_Driver_'.$dbDriver;
+                $dbDriver = 'ForgeUpgrade_Db_Driver_'.$dbDriver;
             } else {
                 echo "Error: invalid --driver".PHP_EOL;
             }

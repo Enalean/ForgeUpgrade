@@ -18,9 +18,9 @@
  * along with ForgeUpgrade. If not, see <http://www.gnu.org/licenses/>.
  */
 
-require_once 'Abstract.php';
+require_once 'src/db/driver/Abstract.php';
 
-class ForgeUpgrade_Driver_Codendi extends ForgeUpgrade_Driver_Abstract {
+class ForgeUpgrade_Db_Driver_Codendi extends ForgeUpgrade_Db_Driver_Abstract {
 
     /**
      * Setup the PDO object to be used for DB connexion

@@ -18,7 +18,7 @@
  * along with ForgeUpgrade. If not, see <http://www.gnu.org/licenses/>.
  */
 
-abstract class ForgeUpgrade_Driver_Abstract {
+abstract class ForgeUpgrade_Db_Driver_Abstract {
 
     /**
      * Setup the PDO object to be used for DB connexion
