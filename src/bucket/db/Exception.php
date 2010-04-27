@@ -18,7 +18,7 @@
  * along with ForgeUpgrade. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class ForgeUpgradeBucketUpgradeNotCompleteException extends Exception {
+class ForgeUpgrade_Bucket_Db_Exception extends Exception {
 }
 
 ?>

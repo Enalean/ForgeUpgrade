@@ -3,7 +3,7 @@
 /**
  *
  */
-class AddSystemEventTable extends ForgeUpgradeBucket {
+class AddSystemEventTable extends ForgeUpgrade_Bucket {
 
     public function description() {
         return <<<EOT

@@ -1,11 +1,9 @@
 <?php
 
-require_once dirname(__FILE__).'/../../src/ForgeUpgradeBucket.php';
-
 /**
  *
  */
-class AddDateColumnToItem extends ForgeUpgradeBucket {
+class AddDateColumnToItem extends ForgeUpgrade_Bucket {
 
     public function dependsOn() {
         return array('AddTablesForDocmanWatermarking');

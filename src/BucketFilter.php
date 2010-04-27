@@ -23,7 +23,7 @@
  *
  * $regex = new RegexIterator($iter, '%^[0-9]+_(.*)\.php$%', RecursiveRegexIterator::GET_MATCH);
  */
-class UpgradeBucketFilter extends FilterIterator {
+class ForgeUpgrade_BucketFilter extends FilterIterator {
 
     protected $includePaths = array();
     protected $excludePaths = array();

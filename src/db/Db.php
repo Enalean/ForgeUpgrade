@@ -18,7 +18,7 @@
  * along with ForgeUpgrade. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class ForgeUpgradeDb {
+class ForgeUpgrade_Db {
 
     const STATUS_SUCCESS = 1;
     const STATUS_FAILURE = 2;
@@ -36,7 +36,7 @@ class ForgeUpgradeDb {
         return $labels[$status];
     }
     
-    public function logUpgrade(ForgeUpgradeBucket $bucket, $status) {
+    public function logUpgrade(ForgeUpgrade_Bucket $bucket, $status) {
         $sth = $this->dbh->prepare('INSERT INTO '.$this->t['bucket'].' (script, date, status, log) VALUES (?, NOW(), ?, ?)');
         if ($sth) {
             return $sth->execute(array($bucket->getPath(), $status, ''));

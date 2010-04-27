@@ -24,8 +24,8 @@ class AllTests extends TestSuite {
     function __construct() {
         parent::__construct('All tests');
         $p = dirname(__FILE__);
-        //$this->addFile($p.'/ForgeUpgradeTest.php');
-        $this->addFile($p.'/ForgeUpgradeFilterBucketTest.php');
+        ini_set('include_path', dirname($p).PATH_SEPARATOR.ini_get('include_path'));
+        $this->addFile($p.'/ForgeUpgrade_BucketFilterTest.php');
     }
 }
 

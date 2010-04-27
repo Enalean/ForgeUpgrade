@@ -18,10 +18,9 @@
  * along with ForgeUpgrade. If not, see <http://www.gnu.org/licenses/>.
  */
 
-require 'ForgeUpgradeBucket.php';
-require 'ForgeUpgradeBucketDb.php';
-require 'ForgeUpgradeBucketFilter.php';
-require 'ForgeUpgradeDb.php';
+require 'bucket/Bucket.php';
+require 'BucketFilter.php';
+require 'db/Db.php';
 
 /**
  * Centralize upgrade of the Forge
@@ -33,7 +32,7 @@ class ForgeUpgrade {
     protected $db;
 
     /**
-     * @var ForgeUpgradeBucketDb
+     * @var ForgeUpgrade_BucketDb
      */
     protected $bucketDb;
 
@@ -54,8 +53,8 @@ class ForgeUpgrade {
      * Constructor
      */
     public function __construct(PDO $dbh) {
-        $this->db       = new ForgeUpgradeDb($dbh);
-        $this->bucketDb = new ForgeUpgradeBucketDb($dbh);
+        $this->db       = new ForgeUpgrade_Db($dbh);
+        $this->bucketDb = new ForgeUpgrade_Bucket_Db($dbh);
     }
 
     function setIncludePaths($paths) {
@@ -189,7 +188,7 @@ class ForgeUpgrade {
                 $this->log()->info("[Up] $className PreUp OK");
 
                 $bucket->up();
-                $this->db->logUpgrade($bucket, ForgeUpgradeDb::STATUS_SUCCESS);
+                $this->db->logUpgrade($bucket, ForgeUpgrade_Db::STATUS_SUCCESS);
                 $this->log()->info("[Up] $className Up OK");
 
                 $bucket->postUp();
@@ -197,7 +196,7 @@ class ForgeUpgrade {
             }
         } catch (Exception $e) {
             $this->log()->error("[Up] ".$e->getMessage());
-            $this->db->logUpgrade($bucket, ForgeUpgradeDb::STATUS_FAILURE);
+            $this->db->logUpgrade($bucket, ForgeUpgrade_Db::STATUS_FAILURE);
         }
     }
 
@@ -223,7 +222,7 @@ class ForgeUpgrade {
         if (!isset($this->buckets)) {
             $iter = new RecursiveDirectoryIterator($dirPath);
             $iter = new RecursiveIteratorIterator($iter, RecursiveIteratorIterator::SELF_FIRST);
-            $iter = new UpgradeBucketFilter($iter);
+            $iter = new ForgeUpgrade_BucketFilter($iter);
             $iter->setIncludePaths($this->includePaths);
             $iter->setExcludePaths($this->excludePaths);
             
@@ -282,7 +281,7 @@ class ForgeUpgrade {
      */
     protected function log() {
         if (!$this->log) {
-            $this->log = Logger::getLogger('ForgeUpgrade');
+            $this->log = Logger::getLogger(get_class());
         }
         return $this->log;
     }

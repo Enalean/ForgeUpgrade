@@ -3,7 +3,7 @@
 /**
  *
  */
-class AddDateColumnToUgroupTable extends ForgeUpgradeBucket {
+class AddDateColumnToUgroupTable extends ForgeUpgrade_Bucket {
 
     public function description() {
         return <<<EOT

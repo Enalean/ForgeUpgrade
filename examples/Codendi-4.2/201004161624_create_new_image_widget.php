@@ -1,11 +1,11 @@
 <?php
 
-//require_once dirname(__FILE__).'/../src/ForgeUpgradeBucket.php';
+//require_once dirname(__FILE__).'/../src/ForgeUpgrade_Bucket.php';
 
 /**
  *
  */
-class CreateNewImageWidget extends ForgeUpgradeBucket {
+class CreateNewImageWidget extends ForgeUpgrade_Bucket {
 
     
     public function description() {
@@ -35,7 +35,7 @@ EOT;
     
     public function postUp() {
         if (!$this->db->tableNameExists('widget_image')) {
-            throw new ForgeUpgradeBucketUpgradeNotCompleteException('widget_image not existing');
+            throw new ForgeUpgrade_Bucket_UpgradeNotCompleteException('widget_image not existing');
         }
         
     }

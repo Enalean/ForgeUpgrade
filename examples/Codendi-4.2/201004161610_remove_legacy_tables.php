@@ -1,12 +1,12 @@
 <?php
 
-//require_once dirname(__FILE__).'/../src/ForgeUpgradeBucket.php';
+//require_once dirname(__FILE__).'/../src/ForgeUpgrade_Bucket.php';
 
 
 /**
  *
  */
-class RemoveLegacyTables extends ForgeUpgradeBucket {
+class RemoveLegacyTables extends ForgeUpgrade_Bucket {
 
     
     public function description() {
@@ -31,16 +31,16 @@ EOT;
     
     public function postUp() {
         if ($this->db->tableNameExists('support_messages')) {
-            throw new ForgeUpgradeBucketUpgradeNotCompleteException('support_messages still exist');
+            throw new ForgeUpgrade_Bucket_UpgradeNotCompleteException('support_messages still exist');
         }
         if ($this->db->tableNameExists('bug_cc')) {
-            throw new ForgeUpgradeBucketUpgradeNotCompleteException('bug_cc still exist');
+            throw new ForgeUpgrade_Bucket_UpgradeNotCompleteException('bug_cc still exist');
         }
         if ($this->db->tableNameExists('project_cc')) {
-            throw new ForgeUpgradeBucketUpgradeNotCompleteException('project_cc still exist');
+            throw new ForgeUpgrade_Bucket_UpgradeNotCompleteException('project_cc still exist');
         }
         if ($this->db->tableNameExists('frs_status')) {
-            throw new ForgeUpgradeBucketUpgradeNotCompleteException('bug_cc still exist');
+            throw new ForgeUpgrade_Bucket_UpgradeNotCompleteException('bug_cc still exist');
         }
     }
 

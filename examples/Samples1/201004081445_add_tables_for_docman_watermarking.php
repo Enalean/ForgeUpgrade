@@ -1,8 +1,6 @@
 <?php
 
-require_once dirname(__FILE__).'/../src/ForgeUpgradeBucket.php';
-
-class AddTablesForDocmanWatermarking extends ForgeUpgradeBucket {
+class AddTablesForDocmanWatermarking extends ForgeUpgrade_Bucket {
 
     public function description() {
         return <<<EOT
@@ -32,10 +30,10 @@ EOT;
     public function postUp() {
         // This 2 checks could be automated with $this->db->createTable
         if (!$this->db->tableNameExists('plugin_docmanwatermark_item_excluded')) {
-            throw new ForgeUpgradeBucketUpgradeNotCompleteException('plugin_docmanwatermark_item_excluded table is missing');
+            throw new ForgeUpgrade_Bucket_UpgradeNotCompleteException('plugin_docmanwatermark_item_excluded table is missing');
         }
         if (!$this->db->tableNameExists('plugin_docmanwatermark_item_excluded_log')) {
-            throw new ForgeUpgradeBucketUpgradeNotCompleteException('plugin_docmanwatermark_item_excluded_log table is missing');
+            throw new ForgeUpgrade_Bucket_UpgradeNotCompleteException('plugin_docmanwatermark_item_excluded_log table is missing');
         }
     }
 

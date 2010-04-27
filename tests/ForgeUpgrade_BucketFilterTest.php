@@ -18,17 +18,17 @@
  * along with ForgeUpgrade. If not, see <http://www.gnu.org/licenses/>.
  */
 
-require_once dirname(__FILE__).'/../src/ForgeUpgradeBucketFilter.php';
+require_once 'src/BucketFilter.php';
 
 Mock::generate('SplFileInfo');
 
-class ForgeUpgradeFilterBucket extends UnitTestCase {
+class ForgeUpgrade_BucketFilterTest extends UnitTestCase {
     
     public function testNameCorrect() {
         $file = new MockSplFileInfo($this);
         $file->setReturnValue('getPathname', '201004231055_add_system_event_table.php');
 
-        $filter = new UpgradeBucketFilter(new ArrayIterator(array($file)));
+        $filter = new ForgeUpgrade_BucketFilter(new ArrayIterator(array($file)));
         $filter->rewind();
         $this->assertTrue($filter->valid());
     }
@@ -37,7 +37,7 @@ class ForgeUpgradeFilterBucket extends UnitTestCase {
         $file = new MockSplFileInfo($this);
         $file->setReturnValue('getPathname', '201004231055_add_system_event_table.pl');
 
-        $filter = new UpgradeBucketFilter(new ArrayIterator(array($file)));
+        $filter = new ForgeUpgrade_BucketFilter(new ArrayIterator(array($file)));
         $filter->rewind();
         $this->assertFalse($filter->valid());
     }
@@ -46,7 +46,7 @@ class ForgeUpgradeFilterBucket extends UnitTestCase {
         $file = new MockSplFileInfo($this);
         $file->setReturnValue('getPathname', '201004231055-add_system_event_table.php');
 
-        $filter = new UpgradeBucketFilter(new ArrayIterator(array($file)));
+        $filter = new ForgeUpgrade_BucketFilter(new ArrayIterator(array($file)));
         $filter->rewind();
         $this->assertFalse($filter->valid());
     }
@@ -55,7 +55,7 @@ class ForgeUpgradeFilterBucket extends UnitTestCase {
         $file = new MockSplFileInfo($this);
         $file->setReturnValue('getPathname', '/toto/src/db/updates/201004231055_add_system_event_table.php');
 
-        $filter = new UpgradeBucketFilter(new ArrayIterator(array($file)));
+        $filter = new ForgeUpgrade_BucketFilter(new ArrayIterator(array($file)));
         $filter->addInclude('/db/updates/');
 
         $filter->rewind();
@@ -66,7 +66,7 @@ class ForgeUpgradeFilterBucket extends UnitTestCase {
         $file = new MockSplFileInfo($this);
         $file->setReturnValue('getPathname', '/toto/src/etc/updates/201004231055_add_system_event_table.php');
 
-        $filter = new UpgradeBucketFilter(new ArrayIterator(array($file)));
+        $filter = new ForgeUpgrade_BucketFilter(new ArrayIterator(array($file)));
         $filter->addInclude('/db/updates/');
 
         $filter->rewind();
@@ -77,7 +77,7 @@ class ForgeUpgradeFilterBucket extends UnitTestCase {
         $file = new MockSplFileInfo($this);
         $file->setReturnValue('getPathname', '/toto/src/etc/updates/201004231055_add_system_event_table.php');
 
-        $filter = new UpgradeBucketFilter(new ArrayIterator(array($file)));
+        $filter = new ForgeUpgrade_BucketFilter(new ArrayIterator(array($file)));
         $filter->addExclude('/etc/updates/');
 
         $filter->rewind();
@@ -88,7 +88,7 @@ class ForgeUpgradeFilterBucket extends UnitTestCase {
         $file = new MockSplFileInfo($this);
         $file->setReturnValue('getPathname', '/toto/src/db/updates/201004231055_add_system_event_table.php');
 
-        $filter = new UpgradeBucketFilter(new ArrayIterator(array($file)));
+        $filter = new ForgeUpgrade_BucketFilter(new ArrayIterator(array($file)));
         $filter->addExclude('/etc/updates/');
 
         $filter->rewind();

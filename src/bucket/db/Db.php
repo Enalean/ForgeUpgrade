@@ -18,13 +18,13 @@
  * along with ForgeUpgrade. If not, see <http://www.gnu.org/licenses/>.
  */
 
-require 'ForgeUpgradeBucketDbException.php';
+require 'Exception.php';
 
 /**
  * Wrap accesss to the DB and provide a set of convenient tools to write
  * DB upgrades
  */
-class ForgeUpgradeBucketDb {
+class ForgeUpgrade_Bucket_Db {
     public $dbh;
 
     protected $log;
@@ -36,7 +36,7 @@ class ForgeUpgradeBucketDb {
      */
     public function __construct(PDO $dbh) {
         $this->dbh = $dbh;
-        $this->log = Logger::getLogger('ForgeUpgrade.Db');
+        $this->log = Logger::getLogger(get_class());
     }
 
     /**
@@ -107,7 +107,7 @@ class ForgeUpgradeBucketDb {
             if ($res === false) {
                 $info = $this->dbh->errorInfo();
                 $this->log->error('An error occured adding table '.$tableName.': '.$info[2].' ('.$info[1].' - '.$info[0].')');
-                throw new ForgeUpgradeBucketDbException($msg);
+                throw new ForgeUpgrade_Bucket_Db_Exception($msg);
             }
             $this->log->info($tableName.' successfully added');
         } else {
@@ -133,7 +133,7 @@ class ForgeUpgradeBucketDb {
             if ($res === false) {
                 $info = $this->dbh->errorInfo();
                 $this->log->error('An error occured deleting table '.$tableName.': '.$info[2].' ('.$info[1].' - '.$info[0].')');
-                throw new ForgeUpgradeBucketDbException($msg);
+                throw new ForgeUpgrade_Bucket_Db_Exception($msg);
             }
             $this->log->info($tableName.' successfully deleted');
         } else {
@@ -156,7 +156,7 @@ class ForgeUpgradeBucketDb {
             if ($res === false) {
                 $info = $this->dbh->errorInfo();
                 $this->log->error('An error occured adding index to '.$tableName.': '.$info[2].' ('.$info[1].' - '.$info[0].')');
-                throw new ForgeUpgradeBucketDbException($msg);
+                throw new ForgeUpgrade_Bucket_Db_Exception($msg);
             }
             $this->log->info($index.' successfully added index');
         } else {

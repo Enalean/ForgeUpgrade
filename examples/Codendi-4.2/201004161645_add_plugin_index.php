@@ -1,12 +1,12 @@
 <?php
 
-//require_once dirname(__FILE__).'/../src/ForgeUpgradeBucket.php';
+//require_once dirname(__FILE__).'/../src/ForgeUpgrade_Bucket.php';
 
 
 /**
  *
  */
-class AddPluginIndex extends ForgeUpgradeBucket {
+class AddPluginIndex extends ForgeUpgrade_Bucket {
 
     public function description() {
         return <<<EOT
@@ -25,10 +25,10 @@ EOT;
     
     public function postUp() {
         if (!$this->db->indexNameExists('priority_plugin_hook', 'idx_plugin_id')) {
-            throw new ForgeUpgradeBucketUpgradeNotCompleteException('idx_plugin_id has not been created on priority_plugin_hook');
+            throw new ForgeUpgrade_Bucket_UpgradeNotCompleteException('idx_plugin_id has not been created on priority_plugin_hook');
         }
         if (!$this->db->indexNameExists('plugin', 'idx_available')) {
-            throw new ForgeUpgradeBucketUpgradeNotCompleteException('idx_available has not been created on plugin');
+            throw new ForgeUpgrade_Bucket_UpgradeNotCompleteException('idx_available has not been created on plugin');
         }
         
     }

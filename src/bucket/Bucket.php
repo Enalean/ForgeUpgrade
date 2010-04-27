@@ -18,12 +18,13 @@
  * along with ForgeUpgrade. If not, see <http://www.gnu.org/licenses/>.
  */
 
-require_once 'ForgeUpgradeBucketExceptions.php';
+require_once 'UpgradeNotCompleteException.php';
+require_once 'db/Db.php';
 
 /**
  * A bucket is a migration scenario
  */
-abstract class ForgeUpgradeBucket {
+abstract class ForgeUpgrade_Bucket {
     protected $db;
     protected $log;
 
@@ -33,11 +34,11 @@ abstract class ForgeUpgradeBucket {
     /**
      * Constructor
      *
-     * @param ForgeUpgradeBucketDb Database access
+     * @param ForgeUpgrade_BucketDb Database access
      */
-    public function __construct(ForgeUpgradeBucketDb $db) {
+    public function __construct(ForgeUpgrade_Bucket_Db $db) {
         $this->db     = $db;
-        $this->log    = Logger::getLogger('ForgeUpgrade.Bucket');
+        $this->log    = Logger::getLogger(get_class());
     }
 
     /**

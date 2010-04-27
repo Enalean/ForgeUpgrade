@@ -1,11 +1,11 @@
 <?php
 
-require dirname(__FILE__).'/../lib/ForgeUpgradeBucket.php';
+require dirname(__FILE__).'/../lib/ForgeUpgrade_Bucket.php';
 
 /**
  *
  */
-class %className% extends ForgeUpgradeBucket {
+class %className% extends ForgeUpgrade_Bucket {
 
 }
 

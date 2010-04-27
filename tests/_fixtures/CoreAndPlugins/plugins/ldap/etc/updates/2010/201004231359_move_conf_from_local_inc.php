@@ -3,7 +3,7 @@
 /**
  *
  */
-class MoveConfFromLocalInc extends ForgeUpgradeBucket {
+class MoveConfFromLocalInc extends ForgeUpgrade_Bucket {
     function description() {
         return 'MoveConfFromLocalIn';
     }
