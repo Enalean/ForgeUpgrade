@@ -70,7 +70,7 @@ for ($i = 1; $i < $argc; $i++) {
     }
     
     // --driver
-    if (preg_match('/--driver=(.*)/',$argv[$i], $matches)) {
+    if (preg_match('/--dbdriver=(.*)/',$argv[$i], $matches)) {
         // First try the file
         if (is_file($matches[1])) {
             require $matches[1];
@@ -83,7 +83,7 @@ for ($i = 1; $i < $argc; $i++) {
                 require $filePath;
                 $dbDriver = 'ForgeUpgrade_Db_Driver_'.$dbDriver;
             } else {
-                echo "Error: invalid --driver".PHP_EOL;
+                echo "Error: invalid --dbdriver".PHP_EOL;
             }
         }
     }
@@ -128,10 +128,12 @@ record-only      Record all available buckets as executed in the database withou
                  actually executing them
 
 Options:
-  --path=[/path]    Path where to find migration buckets [default: current dir]
-  --include=[/path] Only consider paths that contains given pattern
-  --exclude=[/path] Don't consider paths that contains given pattern
+  --path=[/path]           Path where to find migration buckets [default: current dir]
+  --include=[/path]        Only consider paths that contains given pattern
+  --exclude=[/path]        Don't consider paths that contains given pattern
 
+  --dbdriver=[name|/path]  The database driver to use (either a name or a path
+                           to the driver file for custom ones).
 EOT;
 }
 

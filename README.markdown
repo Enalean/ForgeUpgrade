@@ -43,3 +43,23 @@ Wed Apr 14 18:01:40 2010,810 [30794] INFO ForgeUpgrade - [Up] AddDateColumnToIte
 Wed Apr 14 18:01:40 2010,811 [30794] INFO ForgeUpgrade - [Up] AddDateColumnToItem Up OK
 Wed Apr 14 18:01:40 2010,812 [30794] INFO ForgeUpgrade - [Up] AddDateColumnToItem Done
 </pre>
+
+Dedicated db driver
+===================
+
+Instead of writing down your db crendentials in the config.ini file, you can
+develop your own db driver that will be able to read your application db config
+file.
+
+This allows to keep these sensitive informations in only one place (more secure
+and avoid the changes).
+
+To develop your own driver, just create a file that inherits from
+ForgeUpgrade_Db_Driver_Abstract. The file must be named after the class name plus
+.php extension. For instance:
+ForgeUpgrade_Db_Driver_Codendi & ForgeUpgrade_Db_Driver_Codendi.php
+
+Then, just use --dbdriver= option with the path of the file to use as driver
+
+You can have a look at examples/CustomDrivers/ForgeUpgrade_Db_Driver_Codendi.php
+for more details
