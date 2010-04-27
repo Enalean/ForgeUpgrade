@@ -9,7 +9,7 @@ Features
 ========
 The command line tool now allows to select where to look for migration scripts:
 <pre>
-$> php migration.php --path=tests/_fixtures/CoreAndPlugins --include="db/updates" --check-update
+$> php migration.php --path=tests/_fixtures/CoreAndPlugins --include="db/updates" check-update
 </pre>
 
 This will look for migrations in "tests/_fixtures/CoreAndPlugins" subdirectory

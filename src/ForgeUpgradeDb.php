@@ -29,6 +29,13 @@ class ForgeUpgradeDb {
         $this->t['bucket'] = 'forge_upgrade_bucket';
     }
 
+    public static function statusLabel($status) {
+        $labels = array(self::STATUS_SUCCESS => 'success',
+                        self::STATUS_FAILURE => 'failure',
+                        self::STATUS_SKIP    => 'skipped');
+        return $labels[$status];
+    }
+    
     public function logUpgrade(ForgeUpgradeBucket $bucket, $status) {
         $sth = $this->dbh->prepare('INSERT INTO '.$this->t['bucket'].' (script, date, status, log) VALUES (?, NOW(), ?, ?)');
         if ($sth) {
@@ -38,7 +45,7 @@ class ForgeUpgradeDb {
     }
 
     public function getAllBuckets() {
-        $sth = $this->dbh->prepare('SELECT * FROM '.$this->t['bucket']);
+        $sth = $this->dbh->prepare('SELECT * FROM '.$this->t['bucket'].' ORDER BY date ASC');
         if ($sth) {
             $sth->execute();
             return $sth;

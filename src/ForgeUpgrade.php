@@ -70,6 +70,14 @@ class ForgeUpgrade {
      * Run all available migrations
      */
     public function run($func, $paths) {
+        // Commands without path
+        switch ($func) {
+            case 'already-applied':
+                $this->doAlreadyApplied();
+                return;
+        }
+        
+        // Commands that rely on path
         if (count($paths) == 0) {
             $this->log()->info('No migration path');
             return false;
@@ -98,6 +106,12 @@ class ForgeUpgrade {
         }
     }
 
+    protected function doAlreadyApplied() {
+        foreach ($this->db->getAllBuckets() as $row) {
+            echo $row['date']."  ".ucfirst($this->db->statusLabel($row['status']))."  ".$row['script'].PHP_EOL;
+        }
+    }
+    
     protected function doRecordOnly($buckets) {
         foreach ($buckets as $bucket) {
             $this->log()->info("[doRecordOnly] ".get_class($bucket));

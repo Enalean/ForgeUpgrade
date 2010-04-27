@@ -42,6 +42,7 @@ for ($i = 1; $i < $argc; $i++) {
         case 'update':
         case 'check-update':
         case 'run-pre':
+        case 'already-applied':
             $func = $argv[$i];
             break;
     }
@@ -109,11 +110,12 @@ function usage() {
 Usage: migration.php [options] command
 
 Commands:
-check-update  List all available migration buckets not already applied (pending)
-run-pre       Run pending migration buckets "pre" checks 
-update        Execute pending migration buckets
-record-only   Record all available buckets as executed in the database without
-              actually executing them
+already-applied  List all applied buckets
+check-update     List all available migration buckets not already applied (pending)
+run-pre          Run pending migration buckets "pre" checks 
+update           Execute pending migration buckets
+record-only      Record all available buckets as executed in the database without
+                 actually executing them
 
 Options:
   --path=[/path]    Path where to find migration buckets [default: current dir]
