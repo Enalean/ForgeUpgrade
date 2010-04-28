@@ -103,6 +103,9 @@ try {
 }
 
 // Go
+$log = Logger::getRootLogger();
+$log->addAppender($driver->getLoggerAppender());
+
 $upg = new ForgeUpgrade($driver->getPdo());
 $upg->setIncludePaths($includePaths);
 $upg->setExcludePaths($excludePaths);
@@ -134,6 +137,7 @@ Options:
 
   --dbdriver=[name|/path]  The database driver to use (either a name or a path
                            to the driver file for custom ones).
+
 EOT;
 }
 

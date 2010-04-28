@@ -21,7 +21,34 @@
 require_once 'src/db/driver/Abstract.php';
 
 class ForgeUpgrade_Db_Driver_Codendi extends ForgeUpgrade_Db_Driver_Abstract {
+    protected $dsn;
+    protected $user;
+    protected $password;
+    
+    protected function initOptions() {
+        if (!$this->dsn) {
+            $localInc = getenv('CODENDI_LOCAL_INC') ? getenv('CODENDI_LOCAL_INC') : '/etc/codendi/conf/local.inc';
+            if (is_file($localInc)) {
+                include $localInc;
+                include $db_config_file;
 
+                if (strpos($sys_dbhost, ':') !== false) {
+                    list($host, $socket) = explode(':', $sys_dbhost);
+                    $socket = ';unix_socket='.$socket;
+                } else {
+                    $host   = $sys_dbhost;
+                    $socket = '';
+                }
+
+                $this->dsn      = 'mysql:host='.$host.$socket.';dbname='.$sys_dbname;
+                $this->user     = $sys_dbuser;
+                $this->password = $sys_dbpasswd;
+            } else {
+                throw new Exception('Unable to find a valid local.inc for Codendi, please check CODENDI_LOCAL_INC');
+            }
+        }
+    }
+    
     /**
      * Setup the PDO object to be used for DB connexion
      *
@@ -30,26 +57,28 @@ class ForgeUpgrade_Db_Driver_Codendi extends ForgeUpgrade_Db_Driver_Abstract {
      * @return PDO
      */
     public function getPdo() {
-        $localInc = getenv('CODENDI_LOCAL_INC') ? getenv('CODENDI_LOCAL_INC') : '/etc/codendi/conf/local.inc';
-        if (is_file($localInc)) {
-            include $localInc;
-            include $db_config_file;
+        $this->initOptions();
+        $dbh = new PDO($this->dsn, $this->user, $this->password,
+                       array(PDO::MYSQL_ATTR_INIT_COMMAND =>  "SET NAMES 'UTF8'"));
+        return $dbh;
+    }
+    
+    /**
+     * @return LoggerAppenderPDO
+     */
+    public function getLoggerAppender() {
+        $this->initOptions();
 
-            if (strpos($sys_dbhost, ':') !== false) {
-                list($host, $socket) = explode(':', $sys_dbhost);
-                $socket = ';unix_socket='.$socket;
-            } else {
-                $host   = $sys_dbhost;
-                $socket = '';
-            }
+        $logger = new LoggerAppenderPDO();
+        $logger->setUser($this->user);
+        $logger->setPassword($this->password);
+        $logger->setDSN($this->dsn);
+        $logger->setTable('forge_upgrade_log');
+        $logger->setInsertSql('INSERT INTO forge_upgrade_log (timestamp, logger, level, message, thread, file, line) VALUES (?,?,?,?,?,?,?)');
+        $logger->setInsertPattern('%d,%c,%p,%m,%t,%F,%L');
+        $logger->activateOptions();
 
-            $dbh = new PDO('mysql:host='.$host.$socket.';dbname='.$sys_dbname,
-                           $sys_dbuser,
-                           $sys_dbpasswd,
-                           array(PDO::MYSQL_ATTR_INIT_COMMAND =>  "SET NAMES 'UTF8'"));
-            return $dbh;
-        }
-        throw new Exception('Cannot setup PDO connexion to Codendi database');
+        return $logger;
     }
 }
 

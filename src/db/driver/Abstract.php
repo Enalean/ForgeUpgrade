@@ -28,6 +28,13 @@ abstract class ForgeUpgrade_Db_Driver_Abstract {
      * @return PDO
      */
     abstract function getPdo();
+
+    /**
+     * Define the logger appender so logs are stored in the same db than buckets
+     *
+     * @return LoggerAppender
+     */
+    abstract function getLoggerAppender();
 }
 
 ?>
