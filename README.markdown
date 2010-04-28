@@ -5,6 +5,17 @@ ForgeUpgrade
 
 See the [spec](https://codendi.org/wiki/index.php?pagename=UpgradeAutomation&group_id=104) on Codendi.org
 
+Install
+=======
+
+As of today, only Codendi db driver is developed. Before being able to use migration tool, you must
+initialize the database (TODO: use ForgeUpgrade to install itself):
+- execute db/install-mysql.sql
+- set CODENDI_LOCAL_INC to the path toward your codendi local.inc file
+
+then, all your migrations commands will looks like:
+php migration.php --dbdriver=examples/CustomDrivers/ForgeUpgrade_Db_Driver_Codendi.php ...
+
 Features
 ========
 The command line tool now allows to select where to look for migration scripts:
