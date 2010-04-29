@@ -21,6 +21,7 @@
 require_once 'src/db/driver/Abstract.php';
 
 class ForgeUpgrade_Db_Driver_Codendi extends ForgeUpgrade_Db_Driver_Abstract {
+    protected $pdo;
     protected $dsn;
     protected $user;
     protected $password;
@@ -57,16 +58,22 @@ class ForgeUpgrade_Db_Driver_Codendi extends ForgeUpgrade_Db_Driver_Abstract {
      * @return PDO
      */
     public function getPdo() {
-        $this->initOptions();
-        $dbh = new PDO($this->dsn, $this->user, $this->password,
-                       array(PDO::MYSQL_ATTR_INIT_COMMAND =>  "SET NAMES 'UTF8'"));
-        return $dbh;
+        if (!$this->pdo) {
+            $this->initOptions();
+            $this->pdo = new PDO($this->dsn, $this->user, $this->password,
+                                 array(PDO::MYSQL_ATTR_INIT_COMMAND =>  "SET NAMES 'UTF8'"));
+        }
+        return $this->pdo;
     }
-    
+
     /**
+     * Return a PDO logger appender that will reference the given bucket id
+     *
+     * @param ForgeUpgrade_Bucket $bucket The bucket
+     *
      * @return LoggerAppenderPDO
      */
-    public function getLoggerAppender() {
+    public function getBucketLoggerAppender(ForgeUpgrade_Bucket $bucket) {
         $this->initOptions();
 
         $logger = new LoggerAppenderPDO();
@@ -74,22 +81,7 @@ class ForgeUpgrade_Db_Driver_Codendi extends ForgeUpgrade_Db_Driver_Abstract {
         $logger->setPassword($this->password);
         $logger->setDSN($this->dsn);
         $logger->setTable('forge_upgrade_log');
-        $logger->setInsertSql('INSERT INTO forge_upgrade_log (id, bucket_id, timestamp, logger, level, message, thread, file, line) VALUES (NULL,NULL,?,?,?,?,?,?,?)');
-        $logger->setInsertPattern('%d,%c,%p,%m,%t,%F,%L');
-        $logger->activateOptions();
-
-        return $logger;
-    }
-    
-    public function getBucketLoggerAppender($bucketId) {
-        $this->initOptions();
-
-        $logger = new LoggerAppenderPDO();
-        $logger->setUser($this->user);
-        $logger->setPassword($this->password);
-        $logger->setDSN($this->dsn);
-        $logger->setTable('forge_upgrade_log');
-        $logger->setInsertSql('INSERT INTO forge_upgrade_log (id, bucket_id, timestamp, logger, level, message, thread, file, line) VALUES (NULL,'.$bucketId.',?,?,?,?,?,?,?)');
+        $logger->setInsertSql('INSERT INTO forge_upgrade_log (id, bucket_id, timestamp, logger, level, message, thread, file, line) VALUES (NULL,'.$bucket->getId().',?,?,?,?,?,?,?)');
         $logger->setInsertPattern('%d,%c,%p,%m,%t,%F,%L');
         $logger->activateOptions();
 

@@ -27,6 +27,11 @@ require 'db/Db.php';
  */
 class ForgeUpgrade {
     /**
+     * @var ForgeUpgrade_Db_Driver_Abstract
+     */
+    protected $dbDriver;
+
+    /**
      * @var ForgeUpgradeDb
      */
     protected $db;
@@ -54,9 +59,8 @@ class ForgeUpgrade {
      */
     public function __construct(ForgeUpgrade_Db_Driver_Abstract $dbDriver) {
         $this->dbDriver = $dbDriver;
-        $pdo = $dbDriver->getPdo();
-        $this->db       = new ForgeUpgrade_Db($pdo);
-        $this->bucketDb = new ForgeUpgrade_Bucket_Db($pdo);
+        $this->db       = new ForgeUpgrade_Db($dbDriver->getPdo());
+        $this->bucketDb = new ForgeUpgrade_Bucket_Db($dbDriver->getPdo());
     }
 
     function setIncludePaths($paths) {
@@ -182,31 +186,34 @@ class ForgeUpgrade {
             $log = $this->log();
             $log->info('[Up] Start running migrations...');
             foreach ($buckets as $bucket) {
-                $this->db->logUpgrade($bucket);
-                
-                $log = Logger::getLogger(get_class());
-                $log->addAppender($this->dbDriver->getBucketLoggerAppender($bucket->getId()));
-                
-                $bucket->setLoggerParent($log);
-                
                 $className = get_class($bucket);
+                $this->db->logStart($bucket);
 
-                $log->info("[Up] Processing $className");
-                echo $bucket->description();
+                // Prepare a specific logger that will be used to store all
+                // Bucket traces into the database so the buckets and it's logs
+                // will be linked
+                $log = Logger::getLogger(get_class());
+                $log->addAppender($this->dbDriver->getBucketLoggerAppender($bucket));
+                $bucket->setLoggerParent($log);
+
+                $log->info("Processing $className");
 
                 $bucket->preUp();
-                $log->info("[Up] $className PreUp OK");
+                $log->info("$className PreUp OK");
 
                 $bucket->up();
-                $this->db->updateUpgrade($bucket, ForgeUpgrade_Db::STATUS_SUCCESS);
-                $log->info("[Up] $className Up OK");
+                $log->info("$className Up OK");
 
                 $bucket->postUp();
-                $log->info("[Up] $className PostUp OK");
+                $log->info("$className PostUp OK");
+
+                $this->db->logEnd($bucket, ForgeUpgrade_Db::STATUS_SUCCESS);
             }
         } catch (Exception $e) {
-            $log->error("[Up] ".$e->getMessage());
-            $this->db->updateUpgrade($bucket, ForgeUpgrade_Db::STATUS_FAILURE);
+            // Use the last defined $log (so error messages are attached to the
+            // right bucket in DB)
+            $log->error($e->getMessage());
+            $this->db->logEnd($bucket, ForgeUpgrade_Db::STATUS_FAILURE);
         }
     }
 
@@ -238,13 +245,13 @@ class ForgeUpgrade {
             
             $this->buckets = array();
             foreach ($iter as $file) {
-                //var_dump($file->getPathname());
-                $this->log()->debug("Found file $file");
                 if ($file->isFile()) {
                     $object = $this->getMigrationClass($file);
                     if ($object) {
-                        //$this->log()->debug("Add $file as new bucket");
+                        $this->log()->debug("Add $file as new bucket");
                         $this->buckets[basename($file->getPathname())] = $object;
+                    } else {
+                        $this->log()->debug("$file doesn't containt a valid bucket class");
                     }
                 }
             }
