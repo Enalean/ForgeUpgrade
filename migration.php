@@ -75,13 +75,13 @@ for ($i = 1; $i < $argc; $i++) {
         if (is_file($matches[1])) {
             require $matches[1];
             $className = $matches[1];
-            $dbDriver = basename($matches[1], '.php');
+            $dbDriverName = basename($matches[1], '.php');
         } else {
-            $dbDriver = ucfirst(strtolower($matches[1]));
-            $filePath = 'src/db/driver/'.$dbDriver.'.php';
+            $dbDriverName = ucfirst(strtolower($matches[1]));
+            $filePath = 'src/db/driver/'.$dbDriverName.'.php';
             if (is_file($filePath)) {
                 require $filePath;
-                $dbDriver = 'ForgeUpgrade_Db_Driver_'.$dbDriver;
+                $dbDriverName = 'ForgeUpgrade_Db_Driver_'.$dbDriverName;
             } else {
                 echo "Error: invalid --dbdriver".PHP_EOL;
             }
@@ -96,17 +96,15 @@ if ($func == 'help') {
 
 // Get the DB connexion
 try {
-    $driver = new $dbDriver();
+    $dbDriver = new $dbDriverName();
 } catch (PDOException $e) {
     echo 'Connection faild: '.$e->getMessage().PHP_EOL;
     return -1;
 }
 
 // Go
-$log = Logger::getRootLogger();
-$log->addAppender($driver->getLoggerAppender());
 
-$upg = new ForgeUpgrade($driver->getPdo());
+$upg = new ForgeUpgrade($dbDriver);
 $upg->setIncludePaths($includePaths);
 $upg->setExcludePaths($excludePaths);
 $upg->run($func, $paths);

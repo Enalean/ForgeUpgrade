@@ -52,9 +52,11 @@ class ForgeUpgrade {
     /**
      * Constructor
      */
-    public function __construct(PDO $dbh) {
-        $this->db       = new ForgeUpgrade_Db($dbh);
-        $this->bucketDb = new ForgeUpgrade_Bucket_Db($dbh);
+    public function __construct(ForgeUpgrade_Db_Driver_Abstract $dbDriver) {
+        $this->dbDriver = $dbDriver;
+        $pdo = $dbDriver->getPdo();
+        $this->db       = new ForgeUpgrade_Db($pdo);
+        $this->bucketDb = new ForgeUpgrade_Bucket_Db($pdo);
     }
 
     function setIncludePaths($paths) {
@@ -177,26 +179,34 @@ class ForgeUpgrade {
      */
     protected function runUp($buckets) {
         try {
-            $this->log()->info('[Up] Start running migrations...');
+            $log = $this->log();
+            $log->info('[Up] Start running migrations...');
             foreach ($buckets as $bucket) {
+                $this->db->logUpgrade($bucket);
+                
+                $log = Logger::getLogger(get_class());
+                $log->addAppender($this->dbDriver->getBucketLoggerAppender($bucket->getId()));
+                
+                $bucket->setLoggerParent($log);
+                
                 $className = get_class($bucket);
 
-                $this->log()->info("[Up] $className");
+                $log->info("[Up] Processing $className");
                 echo $bucket->description();
 
                 $bucket->preUp();
-                $this->log()->info("[Up] $className PreUp OK");
+                $log->info("[Up] $className PreUp OK");
 
                 $bucket->up();
-                $this->db->logUpgrade($bucket, ForgeUpgrade_Db::STATUS_SUCCESS);
-                $this->log()->info("[Up] $className Up OK");
+                $this->db->updateUpgrade($bucket, ForgeUpgrade_Db::STATUS_SUCCESS);
+                $log->info("[Up] $className Up OK");
 
                 $bucket->postUp();
-                $this->log()->info("[Up] $className Done");
+                $log->info("[Up] $className PostUp OK");
             }
         } catch (Exception $e) {
-            $this->log()->error("[Up] ".$e->getMessage());
-            $this->db->logUpgrade($bucket, ForgeUpgrade_Db::STATUS_FAILURE);
+            $log->error("[Up] ".$e->getMessage());
+            $this->db->updateUpgrade($bucket, ForgeUpgrade_Db::STATUS_FAILURE);
         }
     }
 

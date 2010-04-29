@@ -17,11 +17,12 @@ EOT;
     }
 
     public function preUp() {
+        $this->log->info("Check table exists");
         return $this->db->tableNameExists('plugin_docmanwatermark_item_excluded');
     }
 
     public function up() {
-        //
+        throw new Exception('Coin');
     }
 
 }

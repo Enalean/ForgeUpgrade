@@ -164,6 +164,9 @@ class ForgeUpgrade_Bucket_Db {
         }
     }
 
+    public function setLoggerParent(Logger $log) {
+        $this->log->setParent($log);
+    }
 }
 
 ?>

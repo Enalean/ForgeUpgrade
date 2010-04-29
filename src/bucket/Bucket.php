@@ -116,12 +116,25 @@ abstract class ForgeUpgrade_Bucket {
         return $this->dryRun();
     }
 
+    public function setLoggerParent(Logger $log) {
+        $this->log->setParent($log);
+        $this->db->setLoggerParent($this->log);
+    }
+    
     public function setPath($path) {
         $this->path = $path;
     }
 
     public function getPath() {
         return $this->path;
+    }
+    
+    public function setId($id) {
+        $this->id = $id;
+    }
+    
+    public function getId() {
+        return $this->id;
     }
 }
 

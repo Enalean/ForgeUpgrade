@@ -36,14 +36,22 @@ class ForgeUpgrade_Db {
         return $labels[$status];
     }
     
-    public function logUpgrade(ForgeUpgrade_Bucket $bucket, $status) {
-        $sth = $this->dbh->prepare('INSERT INTO '.$this->t['bucket'].' (script, date, status, log) VALUES (?, NOW(), ?, ?)');
+    public function logUpgrade(ForgeUpgrade_Bucket $bucket) {
+        $sth = $this->dbh->prepare('INSERT INTO '.$this->t['bucket'].' (script, date) VALUES (?, NOW())');
         if ($sth) {
-            return $sth->execute(array($bucket->getPath(), $status, ''));
+            $sth->execute(array($bucket->getPath()));
+            $bucket->setId($this->dbh->lastInsertId());
+        }
+    }
+
+    public function updateUpgrade(ForgeUpgrade_Bucket $bucket, $status) {
+        $sth = $this->dbh->prepare('UPDATE '.$this->t['bucket'].' SET status = ? WHERE id = ?');
+        if ($sth) {
+            return $sth->execute(array($status, $bucket->getId()));
         }
         return false;
     }
-
+    
     public function getAllBuckets() {
         $sth = $this->dbh->prepare('SELECT * FROM '.$this->t['bucket'].' ORDER BY date ASC');
         if ($sth) {

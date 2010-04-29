@@ -74,7 +74,22 @@ class ForgeUpgrade_Db_Driver_Codendi extends ForgeUpgrade_Db_Driver_Abstract {
         $logger->setPassword($this->password);
         $logger->setDSN($this->dsn);
         $logger->setTable('forge_upgrade_log');
-        $logger->setInsertSql('INSERT INTO forge_upgrade_log (timestamp, logger, level, message, thread, file, line) VALUES (?,?,?,?,?,?,?)');
+        $logger->setInsertSql('INSERT INTO forge_upgrade_log (id, bucket_id, timestamp, logger, level, message, thread, file, line) VALUES (NULL,NULL,?,?,?,?,?,?,?)');
+        $logger->setInsertPattern('%d,%c,%p,%m,%t,%F,%L');
+        $logger->activateOptions();
+
+        return $logger;
+    }
+    
+    public function getBucketLoggerAppender($bucketId) {
+        $this->initOptions();
+
+        $logger = new LoggerAppenderPDO();
+        $logger->setUser($this->user);
+        $logger->setPassword($this->password);
+        $logger->setDSN($this->dsn);
+        $logger->setTable('forge_upgrade_log');
+        $logger->setInsertSql('INSERT INTO forge_upgrade_log (id, bucket_id, timestamp, logger, level, message, thread, file, line) VALUES (NULL,'.$bucketId.',?,?,?,?,?,?,?)');
         $logger->setInsertPattern('%d,%c,%p,%m,%t,%F,%L');
         $logger->activateOptions();
 
