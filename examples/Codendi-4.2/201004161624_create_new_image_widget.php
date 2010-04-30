@@ -5,7 +5,7 @@
 /**
  *
  */
-class CreateNewImageWidget extends ForgeUpgrade_Bucket {
+class b201004161624_create_new_image_widget extends ForgeUpgrade_Bucket {
 
     
     public function description() {

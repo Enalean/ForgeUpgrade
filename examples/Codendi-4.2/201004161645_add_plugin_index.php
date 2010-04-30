@@ -1,12 +1,9 @@
 <?php
 
-//require_once dirname(__FILE__).'/../src/ForgeUpgrade_Bucket.php';
-
-
 /**
  *
  */
-class AddPluginIndex extends ForgeUpgrade_Bucket {
+class b201004161645_add_plugin_index extends ForgeUpgrade_Bucket {
 
     public function description() {
         return <<<EOT

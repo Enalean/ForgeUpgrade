@@ -6,7 +6,7 @@
 /**
  *
  */
-class RemoveLegacyTables extends ForgeUpgrade_Bucket {
+class b201004161610_remove_legacy_tables extends ForgeUpgrade_Bucket {
 
     
     public function description() {

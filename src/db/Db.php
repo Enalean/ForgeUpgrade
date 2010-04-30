@@ -19,10 +19,14 @@
  */
 
 class ForgeUpgrade_Db {
-
     const STATUS_SUCCESS = 1;
     const STATUS_FAILURE = 2;
     const STATUS_SKIP    = 3;
+
+    /**
+     * @var PDO
+     */
+    protected $dbh;
 
     public function __construct(PDO $dbh) {
         $this->dbh = $dbh;
@@ -52,13 +56,13 @@ class ForgeUpgrade_Db {
         return false;
     }
     
-    public function getAllBuckets() {
-        $sth = $this->dbh->prepare('SELECT * FROM '.$this->t['bucket'].' ORDER BY date ASC');
-        if ($sth) {
-            $sth->execute();
-            return $sth;
+    public function getAllBuckets($status=false) {
+        $stmt   = '';
+        if ($status != false) {
+            $escapedStatus = array_map(array($this->dbh, 'quote'), $status);
+            $stmt   = ' WHERE status IN ('.implode(',', $escapedStatus).')';
         }
-        return array();
+        return $this->dbh->query('SELECT * FROM '.$this->t['bucket'].$stmt.' ORDER BY start_date ASC');
     }
 
 }

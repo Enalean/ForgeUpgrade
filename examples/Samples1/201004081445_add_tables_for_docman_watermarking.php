@@ -1,6 +1,6 @@
 <?php
 
-class AddTablesForDocmanWatermarking extends ForgeUpgrade_Bucket {
+class b201004081445_add_tables_for_docman_watermarking extends ForgeUpgrade_Bucket {
 
     public function description() {
         return <<<EOT

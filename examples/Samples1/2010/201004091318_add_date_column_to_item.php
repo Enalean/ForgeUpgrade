@@ -3,7 +3,7 @@
 /**
  *
  */
-class AddDateColumnToItem extends ForgeUpgrade_Bucket {
+class b201004091318_add_date_column_to_item extends ForgeUpgrade_Bucket {
 
     public function dependsOn() {
         return array('AddTablesForDocmanWatermarking');

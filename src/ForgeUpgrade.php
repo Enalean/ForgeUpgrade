@@ -113,14 +113,15 @@ class ForgeUpgrade {
 
     protected function doAlreadyApplied() {
         foreach ($this->db->getAllBuckets() as $row) {
-            echo $row['date']."  ".ucfirst($this->db->statusLabel($row['status']))."  ".$row['script'].PHP_EOL;
+            echo $row['start_date']."  ".ucfirst($this->db->statusLabel($row['status']))."  ".$row['script'].PHP_EOL;
         }
     }
     
     protected function doRecordOnly($buckets) {
         foreach ($buckets as $bucket) {
             $this->log()->info("[doRecordOnly] ".get_class($bucket));
-            $this->db->logUpgrade($bucket, ForgeUpgradeDb::STATUS_SKIP);
+            $this->db->logStart($bucket);
+            $this->db->logEnd($bucket, ForgeUpgrade_Db::STATUS_SKIP);
         }
     }
     
@@ -132,7 +133,7 @@ class ForgeUpgrade {
 
     protected function doCheckUpdate($buckets) {
         foreach ($buckets as $bucket) {
-            echo get_class($bucket).' ('.$bucket->getPath().')'.PHP_EOL;
+            echo $bucket->getPath().PHP_EOL;
             $lines = explode("\n", $bucket->description());
             foreach ($lines as $line) {
                 echo "\t$line\n";
@@ -150,25 +151,26 @@ class ForgeUpgrade {
      * @todo: Add info on the number of buckets Success, Faild, Skipped
      */
     public function runPreUp($buckets) {
-        $this->log()->info("[Pre Up] Run pre up checks");
+        $this->log()->info("Process all pre up checks");
         $result = true;
         foreach ($buckets as $bucket) {
+            $className = get_class($bucket);
             try {
                 if (!$bucket->dependsOn()) {
                     $bucket->preUp();
-                    $this->log()->info("[Pre Up] OK : ".get_class($bucket));
+                    $this->log()->info("OK: $className");
                 } else {
-                    $this->log()->info("[Pre Up] SKIP: ".get_class($bucket)." depends on a migration not already applied");
+                    $this->log()->info("SKIP: ".$className." (depends on a migration not already applied)");
                 }
             } catch (Exception $e) {
-                $this->log()->error("[Pre Up] ERROR : ".get_class($bucket));
+                $this->log()->error($className.': '.$e->getMessage());
                 $result = false;
             }
         }
         if ($result) {
-            $this->log()->info("[Pre Up] Global: OK");
+            $this->log()->info("PreUp checks OK");
         } else {
-            $this->log()->error("[Pre Up] Global: FAILD");
+            $this->log()->error("PreUp checks FAILD");
         }
 
         return $result;
@@ -184,9 +186,8 @@ class ForgeUpgrade {
     protected function runUp($buckets) {
         try {
             $log = $this->log();
-            $log->info('[Up] Start running migrations...');
+            $log->info('Start running migrations...');
             foreach ($buckets as $bucket) {
-                $className = get_class($bucket);
                 $this->db->logStart($bucket);
 
                 // Prepare a specific logger that will be used to store all
@@ -196,16 +197,16 @@ class ForgeUpgrade {
                 $log->addAppender($this->dbDriver->getBucketLoggerAppender($bucket));
                 $bucket->setLoggerParent($log);
 
-                $log->info("Processing $className");
+                $log->info("Processing ".get_class($bucket));
 
                 $bucket->preUp();
-                $log->info("$className PreUp OK");
+                $log->info("PreUp OK");
 
                 $bucket->up();
-                $log->info("$className Up OK");
+                $log->info("Up OK");
 
                 $bucket->postUp();
-                $log->info("$className PostUp OK");
+                $log->info("PostUp OK");
 
                 $this->db->logEnd($bucket, ForgeUpgrade_Db::STATUS_SUCCESS);
             }
@@ -218,12 +219,13 @@ class ForgeUpgrade {
     }
 
     protected function getMigrationBuckets($dirPath) {
-        $this->log()->info("Find buckets in $dirPath");
+        $this->log()->debug("Look for buckets in $dirPath");
         $buckets = $this->getAllMigrationBuckets($dirPath);
-        $sth = $this->db->getAllBuckets();
+        $sth = $this->db->getAllBuckets(array(ForgeUpgrade_Db::STATUS_SUCCESS, ForgeUpgrade_Db::STATUS_SKIP));
         foreach($sth as $row) {
             $key = basename($row['script']);
             if (isset($buckets[$key])) {
+                $this->log()->debug("Remove (already applied): $key");
                 unset($buckets[$key]);
             }
         }
@@ -248,10 +250,10 @@ class ForgeUpgrade {
                 if ($file->isFile()) {
                     $object = $this->getMigrationClass($file);
                     if ($object) {
-                        $this->log()->debug("Add $file as new bucket");
+                        $this->log()->debug("Valid bucket: $file");
                         $this->buckets[basename($file->getPathname())] = $object;
                     } else {
-                        $this->log()->debug("$file doesn't containt a valid bucket class");
+                        $this->log()->debug("Invalid bucket: $file");
                     }
                 }
             }
@@ -276,19 +278,14 @@ class ForgeUpgrade {
     /**
      * Deduce the class name from the script name
      *
-     * migrations/201004081445_add_tables_for_docman_watermarking.php -> AddTablesForDocmanWatermarking
+     * migrations/201004081445_add_tables_for_docman_watermarking.php -> b201004081445_add_tables_for_docman_watermarking
      *
      * @param String $scriptPath Path to the script to execute
      *
      * @return String
      */
     protected function getClassName($scriptPath) {
-        if(preg_match('%^[0-9]+_(.*)\.php$%', basename($scriptPath), $matches)) {
-            $words    = explode('_', $matches[1]);
-            $capWords = array_map('ucfirst', $words);
-            return implode('', $capWords);
-        }
-        return '';
+        return 'b'.basename($scriptPath, '.php');
     }
 
     /**
