@@ -19,26 +19,35 @@
  */
 
 require_once 'UpgradeNotCompleteException.php';
+require_once 'ApiNotFoundException.php';
 require_once 'db/Db.php';
 
 /**
  * A bucket is a migration scenario
  */
 abstract class ForgeUpgrade_Bucket {
-    protected $db;
     protected $log;
+    protected $api;
 
     protected $dryRun = true;
     protected $path   = '';
 
     /**
      * Constructor
-     *
-     * @param ForgeUpgrade_BucketDb Database access
      */
-    public function __construct(ForgeUpgrade_Bucket_Db $db) {
-        $this->db     = $db;
+    public function __construct() {
         $this->log    = Logger::getLogger(get_class());
+    }
+
+    public function setApi($api) {
+        $this->api[get_class($api)] = $api;
+    }
+
+    public function getApi($key) {
+        if (isset($this->api[$key])) {
+            return $this->api[$key];
+        }
+        throw new ForgeUpgrade_Bucket_Exception_ApiNotFound('API "'.$key.'" not found');
     }
 
     /**

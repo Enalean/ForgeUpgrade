@@ -269,10 +269,15 @@ class ForgeUpgrade {
             include $scriptPath->getPathname();
         }
         if ($class != '' && class_exists($class)) {
-            $bucket = new $class($this->bucketDb);
+            $bucket = new $class();
             $bucket->setPath($scriptPath->getPathname());
+            $this->addBucketApi($bucket);
         }
         return $bucket;
+    }
+
+    protected function addBucketApi(ForgeUpgrade_Bucket $bucket) {
+        $bucket->setApi($this->bucketDb);
     }
 
     /**

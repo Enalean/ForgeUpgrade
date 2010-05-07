@@ -10,6 +10,10 @@ allow admins to disable watermarking on selected documents.
 EOT;
     }
 
+    public function preUp() {
+        $this->db = $this->getApi('ForgeUpgrade_Bucket_Db');
+    }
+
     public function up() {
         $sql = 'CREATE TABLE plugin_docmanwatermark_item_excluded ('.
                '  item_id INT(11) UNSIGNED NOT NULL,'.

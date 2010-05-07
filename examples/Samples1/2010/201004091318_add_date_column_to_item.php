@@ -17,6 +17,7 @@ EOT;
     }
 
     public function preUp() {
+        $this->db = $this->getApi('ForgeUpgrade_Bucket_Db');
         $this->log->info("Check table exists");
         return $this->db->tableNameExists('plugin_docmanwatermark_item_excluded');
     }
