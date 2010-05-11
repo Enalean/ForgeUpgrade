@@ -29,16 +29,16 @@ EOT;
      }
     
     public function postUp() {
-       if (!$this->db->propertieExists('plugin_statistics_user_session', 'INFORMATION_SCHEMA.TABLES', 'engine = "INNODB"')) {
+       if (!$this->db->propertyExists('plugin_statistics_user_session', 'INFORMATION_SCHEMA.TABLES', 'engine = "INNODB"')) {
             throw new ForgeUpgrade_Bucket_UpgradeNotCompleteException('The engine has not been changed for plugin_statistics_user_session');
         }
-        if (!$this->db->propertieExists('plugin_statistics_diskusage_group', 'INFORMATION_SCHEMA.TABLES', 'engine = "INNODB"')) {
+        if (!$this->db->propertyExists('plugin_statistics_diskusage_group', 'INFORMATION_SCHEMA.TABLES', 'engine = "INNODB"')) {
             throw new ForgeUpgrade_Bucket_UpgradeNotCompleteException('The engine has not been changed for plugin_statistics_diskusage_group');
         }
-        if (!$this->db->propertieExists('plugin_statistics_diskusage_user', 'INFORMATION_SCHEMA.TABLES', 'engine = "INNODB"')) {
+        if (!$this->db->propertyExists('plugin_statistics_diskusage_user', 'INFORMATION_SCHEMA.TABLES', 'engine = "INNODB"')) {
             throw new ForgeUpgrade_Bucket_UpgradeNotCompleteException('The engine has not been changed for plugin_statistics_diskusage_user');
         }
-        if (!$this->db->propertieExists('plugin_statistics_diskusage_site', 'INFORMATION_SCHEMA.TABLES', 'engine = "INNODB"')) {
+        if (!$this->db->propertyExists('plugin_statistics_diskusage_site', 'INFORMATION_SCHEMA.TABLES', 'engine = "INNODB"')) {
             throw new ForgeUpgrade_Bucket_UpgradeNotCompleteException('The engine has not been changed for plugin_statistics_diskusage_site');
         }
        
