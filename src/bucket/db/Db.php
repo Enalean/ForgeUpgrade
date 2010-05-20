@@ -164,6 +164,50 @@ class ForgeUpgrade_Bucket_Db {
         }
     }
 
+    /**
+     * Return true if given table has a given propertie
+     *
+     * @param String $tableName   Table name
+     * @param String $schema      Schema 
+     * @param String $property    Field
+     *
+     * @return Boolean
+     */
+    public function propertyExists($tableName, $schema, $property) {
+        $sql = 'SELECT table_name FROM '.$this->dbh->quote($schema).' WHERE '.$property.' AND table_name LIKE '.$this->dbh->quote($tableName);
+        $res = $this->dbh->query($sql);
+        if ($res && $res->fetch() !== false) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Alter table
+     *
+     * Alter table to modify field value and report errors.
+     *
+     * @param String             $tableName   Table name
+     * @param String             $schema      Schema 
+     * @param String             $property    Field
+     * @param String             $sql         The alter table statement
+     */
+    public function alterTable($tableName, $schema, $property, $sql) {
+        $this->log->info('Alter table '.$tableName);
+        if (!$this->propertieExists($tableName, $schema, $property)) {
+            $res = $this->dbh->exec($sql);
+            if ($res === false) {
+                $info = $this->dbh->errorInfo();
+                $this->log->error('An error occured while altering '.$tableName.': '.$info[2].' ('.$info[1].' - '.$info[0].')');
+                throw new ForgeUpgrade_Bucket_Db_Exception($msg);
+            }
+            $this->log->info($index.' successfully altered table');
+        } else {
+            $this->log->info($index.' already modified');
+        }
+    }
+
     public function setLoggerParent(Logger $log) {
         $this->log->setParent($log);
     }

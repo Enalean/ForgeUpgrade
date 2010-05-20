@@ -25,8 +25,9 @@ ini_set('memory_limit', -1);
 
 ini_set('include_path', dirname(__FILE__).PATH_SEPARATOR.ini_get('include_path'));
 
-require 'src/ForgeUpgrade.php';
 require 'lib/log4php/Logger.php';
+require 'src/ForgeUpgrade.php';
+require 'src/LoggerAppenderConsoleColor.php';
 
 // Parameters
 $func         = 'help';
@@ -103,6 +104,14 @@ try {
 }
 
 // Go
+$logger = Logger::getRootLogger();
+$logger->removeAllAppenders();
+$appender = new LoggerAppenderConsoleColor('LoggerAppenderConsoleColor');
+$appender->setLayout( new LoggerLayoutTTCC() );
+$appender->activateOptions();
+$logger->addAppender($appender);
+
+
 
 $upg = new ForgeUpgrade($dbDriver);
 $upg->setIncludePaths($includePaths);
