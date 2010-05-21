@@ -127,7 +127,7 @@ abstract class ForgeUpgrade_Bucket {
 
     public function setLoggerParent(Logger $log) {
         $this->log->setParent($log);
-        $this->db->setLoggerParent($this->log);
+        //$this->db->setLoggerParent($this->log);
     }
     
     public function setPath($path) {

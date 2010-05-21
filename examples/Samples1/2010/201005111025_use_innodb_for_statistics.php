@@ -5,7 +5,7 @@
 /**
  *
  */
-class UseInnoDBForStatistics extends ForgeUpgrade_Bucket {
+class b201005111025_use_innodb_for_statistics extends ForgeUpgrade_Bucket {
     public function description() {
         return <<<EOT
 Change the storage engine from MyIsam to InnoDb for statistics tables 
