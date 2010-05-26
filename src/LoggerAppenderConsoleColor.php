@@ -16,6 +16,7 @@ class LoggerAppenderConsoleColor extends LoggerAppenderConsole {
      * @return string
      */
     public function colorize(LoggerLoggingEvent $event) {
+        $color = null;
         switch ($event->getLevel()->toString()) {
             case 'INFO':
                 $color = self::GREEN;
@@ -29,11 +30,12 @@ class LoggerAppenderConsoleColor extends LoggerAppenderConsole {
             case 'FATAL':
                 $color = self::BLACK.self::BG_RED;
                 break;
-            default:
-                break;
         }
         $format = $this->layout->format($event);
-        return $color.$format.self::NOCOLOR;
+        if ($color) {
+            $format = $color.$format.self::NOCOLOR;
+        }
+        return $format;
     }
 
 
