@@ -44,6 +44,7 @@ for ($i = 1; $i < $argc; $i++) {
         case 'check-update':
         case 'run-pre':
         case 'already-applied':
+        case 'ignore-preup':
             $func = $argv[$i];
             break;
     }
@@ -136,6 +137,7 @@ run-pre          Run pending migration buckets "pre" checks
 update           Execute pending migration buckets
 record-only      Record all available buckets as executed in the database without
                  actually executing them
+ignore-preup     Execute migration buckets whithout running "pre" checks
 
 Options:
   --path=[/path]           Path where to find migration buckets [default: current dir]

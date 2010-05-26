@@ -105,6 +105,11 @@ class ForgeUpgrade {
                 case 'run-pre':
                     $this->runPreUp($buckets);
                     break;
+
+                case 'ignore-preup':
+                    $this->doIgnorePreUp($buckets);
+                    break;
+
             }
         } else {
             $this->log()->info('System up-to-date');
@@ -129,6 +134,10 @@ class ForgeUpgrade {
         if ($this->runPreUp($buckets)) {
             $this->runUp($buckets);
         }
+    }
+
+    protected function doIgnorePreUp($buckets) {
+        $this->runUp($buckets);
     }
 
     protected function doCheckUpdate($buckets) {
