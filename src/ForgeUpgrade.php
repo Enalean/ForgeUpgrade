@@ -237,32 +237,65 @@ class ForgeUpgrade {
      *
      * @return Array of SplFileInfo
      */
-    public function getAllMigrationBuckets($dirPath) {
+    public function getAllMigrationBuckets($path) {
         if (!isset($this->buckets)) {
-            $iter = new RecursiveDirectoryIterator($dirPath);
-            $iter = new RecursiveIteratorIterator($iter, RecursiveIteratorIterator::SELF_FIRST);
-            $iter = new ForgeUpgrade_BucketFilter($iter);
-            $iter->setIncludePaths($this->includePaths);
-            $iter->setExcludePaths($this->excludePaths);
-            
             $this->buckets = array();
-            foreach ($iter as $file) {
-                if ($file->isFile()) {
-                    $object = $this->getMigrationClass($file);
-                    if ($object) {
-                        $this->log()->debug("Valid bucket: $file");
-                        $this->buckets[basename($file->getPathname())] = $object;
-                    } else {
-                        $this->log()->debug("Invalid bucket: $file");
-                    }
+            if (is_dir($path)) {
+                $iter = $this->getBucketFinderIterator($path);
+                foreach ($iter as $file) {
+                    $this->queueMigrationBucket($file);
                 }
+            } else {
+                $this->queueMigrationBucket(new SplFileInfo($path));
             }
             ksort($this->buckets, SORT_STRING);
         }
         return $this->buckets;
     }
 
-    protected function getMigrationClass(SplFileInfo $scriptPath) {
+    /**
+     * Build iterator to find buckets in a file hierarchy
+     * 
+     * @param String $dirPath
+     * 
+     * @return ForgeUpgrade_BucketFilter
+     */
+    protected function getBucketFinderIterator($dirPath) {
+        $iter = new RecursiveDirectoryIterator($dirPath);
+        $iter = new RecursiveIteratorIterator($iter, RecursiveIteratorIterator::SELF_FIRST);
+        $iter = new ForgeUpgrade_BucketFilter($iter);
+        $iter->setIncludePaths($this->includePaths);
+        $iter->setExcludePaths($this->excludePaths);
+        return $iter;
+    }
+
+    /**
+     * Append a bucket in the bucket candidate list
+     * 
+     * @param SplFileInfo $file
+     * 
+     * @return void
+     */
+    protected function queueMigrationBucket(SplFileInfo $file) {
+        if ($file->isFile()) {
+            $object = $this->getBucketClass($file);
+            if ($object) {
+                $this->log()->debug("Valid bucket: $file");
+                $this->buckets[basename($file->getPathname())] = $object;
+            } else {
+                $this->log()->debug("Invalid bucket: $file");
+            }
+        }
+    }
+
+    /**
+     * Create a new bucket object defined in given file
+     * 
+     * @param SplFileInfo $scriptPath Path to the bucket definition
+     * 
+     * @return ForgeUpgrade_Bucket
+     */
+    protected function getBucketClass(SplFileInfo $scriptPath) {
         $bucket = null;
         $class  = $this->getClassName($scriptPath->getPathname());
         if (!class_exists($class)) {
@@ -271,12 +304,20 @@ class ForgeUpgrade {
         if ($class != '' && class_exists($class)) {
             $bucket = new $class();
             $bucket->setPath($scriptPath->getPathname());
-            $this->addBucketApi($bucket);
+            $this->addBucketApis($bucket);
         }
         return $bucket;
     }
 
-    protected function addBucketApi(ForgeUpgrade_Bucket $bucket) {
+    /**
+     * Add all available API to the given bucket
+     * 
+     * @param ForgeUpgrade_Bucket $bucket
+     * 
+     * @return void
+     */
+    protected function addBucketApis(ForgeUpgrade_Bucket $bucket) {
+        // Simple db api
         $bucket->setApi($this->bucketDb);
     }
 

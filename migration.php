@@ -53,7 +53,7 @@ for ($i = 1; $i < $argc; $i++) {
 
     // --path
     if (preg_match('/--path=(.*)/',$argv[$i], $matches)) {
-        if (is_dir($matches[1])) {
+        if (is_dir($matches[1]) || is_file($matches[1])) {
             $paths[] = $matches[1];
         } else {
             echo 'Error "'.$matches[1].'" is not a valid directory'.PHP_EOL;
