@@ -30,14 +30,8 @@ require 'src/ForgeUpgrade.php';
 require 'src/LoggerAppenderConsoleColor.php';
 
 // Parameters
-$func         = 'help';
-$options['core']['path']         = array();
-$options['core']['include_path'] = array();
-$options['core']['exclude_path'] = array();
-$options['core']['dbdriver']     = null;
-$options['core']['ignore_preup'] = false;
-$options['core']['force']        = false;
-
+$func    = 'help';
+$options = array();
 for ($i = 1; $i < $argc; $i++) {
     //
     // Commands
@@ -135,19 +129,8 @@ $logger->addAppender($appender);
 
 // Go
 $upg = new ForgeUpgrade($dbDriver);
-if (isset($options['core']['include_path'])) {
-    $upg->setIncludePaths($options['core']['include_path']);
-}
-if (isset($options['core']['exclude_path'])) {
-    $upg->setExcludePaths($options['core']['exclude_path']);
-}
-if (isset($options['core']['ignore_preup'])) {
-    $upg->setIgnorePreUpOption($options['core']['ignore_preup']);
-}
-if (isset($options['core']['force'])) {
-    $upg->setForceOption($options['core']['force']);
-}
-$upg->run($func, $options['core']['path']);
+$upg->setOptions($options);
+$upg->run($func);
 
 //
 // Function definitions

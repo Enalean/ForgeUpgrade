@@ -52,13 +52,6 @@ class ForgeUpgrade {
      */
     protected $buckets = null;
 
-    protected $includePaths = array();
-    protected $excludePaths = array();
-    
-    protected $forceOption;
-    protected $ignorePreUpOption;
-    
-
     /**
      * Constructor
      */
@@ -68,27 +61,39 @@ class ForgeUpgrade {
         $this->bucketApi['ForgeUpgrade_Bucket_Db'] = new ForgeUpgrade_Bucket_Db($dbDriver->getPdo());
     }
 
-    function setIncludePaths($paths) {
-        $this->includePaths = $paths;
+    /**
+     * Set all options of forge upgrade
+     * 
+     * @param Array $options
+     * 
+     * @return void
+     */
+    function setOptions(array $options) {
+        if (!isset($options['core']['path'])) {
+            $options['core']['path']         = array();
+        }
+        if (!isset($options['core']['include_path'])) {
+            $options['core']['include_path'] = array();
+        }
+        if (!isset($options['core']['exclude_path'])) {
+            $options['core']['exclude_path'] = array();
+        }
+        if (!isset($options['core']['dbdriver'])) {
+            $options['core']['dbdriver']     = null;
+        }
+        if (!isset($options['core']['ignore_preup'])) {
+            $options['core']['ignore_preup'] = false;
+        }
+        if (!isset($options['core']['force'])) {
+            $options['core']['force']        = false;
+        }
+        $this->options = $options;
     }
 
-    function setExcludePaths($paths) {
-        $this->excludePaths = $paths;
-    }
-    
-    function setIgnorePreUpOption($ignorePreUp) {
-        $this->ignorePreUpOption = $ignorePreUp;
-    }
-    
-    function setForceOption($force) {
-        $this->forceOption = $force;
-    }
-    
-    
     /**
      * Run all available migrations
      */
-    public function run($func, $paths) {
+    public function run($func) {
         // Commands without path
         switch ($func) {
             case 'already-applied':
@@ -97,11 +102,11 @@ class ForgeUpgrade {
         }
         
         // Commands that rely on path
-        if (count($paths) == 0) {
-            $this->log()->info('No migration path');
+        if (count($this->options['core']['path']) == 0) {
+            $this->log()->error('No migration path');
             return false;
         }
-        $buckets = $this->getMigrationBuckets($paths[0]);
+        $buckets = $this->getMigrationBuckets($this->options['core']['path'][0]);
         if (count($buckets) > 0) {
             switch ($func) {
                 case 'record-only':
@@ -141,7 +146,7 @@ class ForgeUpgrade {
     }
     
     protected function doUpdate($buckets) {
-        if (!$this->ignorePreUpOption) {
+        if (!$this->options['core']['ignore_preup']) {
             if ($this->runPreUp($buckets)) {
                 $this->runUp($buckets);
             }
@@ -233,7 +238,7 @@ class ForgeUpgrade {
         $log = $this->log();
         $log->info('Start running migrations...');
 
-        if (!$this->forceOption) {
+        if (!$this->options['core']['force']) {
             try {
                 foreach ($buckets as $bucket) {
                     $this->runUpBucket($bucket);
@@ -304,8 +309,8 @@ class ForgeUpgrade {
         $iter = new RecursiveDirectoryIterator($dirPath);
         $iter = new RecursiveIteratorIterator($iter, RecursiveIteratorIterator::SELF_FIRST);
         $iter = new ForgeUpgrade_BucketFilter($iter);
-        $iter->setIncludePaths($this->includePaths);
-        $iter->setExcludePaths($this->excludePaths);
+        $iter->setIncludePaths($this->options['core']['include_path']);
+        $iter->setExcludePaths($this->options['core']['exclude_path']);
         return $iter;
     }
 
