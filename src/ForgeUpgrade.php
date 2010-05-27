@@ -203,7 +203,13 @@ class ForgeUpgrade {
         return $result;
     }
 
-    public function runUpBucket($bucket) {
+    /**
+     * It executes the bucket and logs its status 
+     * 
+     * @param ForgeUpgrade_Bucket  $bucket
+     * @param Logger               $log
+     */
+    public function runUpBucket($bucket, $log) {
         $this->db->logStart($bucket);
         // Prepare a specific logger that will be used to store all
         // Bucket traces into the database so the buckets and it's logs
@@ -213,9 +219,11 @@ class ForgeUpgrade {
         $bucket->setLoggerParent($log);
 
         $log->info("Processing ".get_class($bucket));
-
-        $bucket->preUp();
-        $log->info("PreUp OK");
+        
+        if (!$this->ignorePreUpOption) {
+            $bucket->preUp();
+            $log->info("PreUp OK");
+        }
 
         $bucket->up();
         $log->info("Up OK");
@@ -224,7 +232,7 @@ class ForgeUpgrade {
         $log->info("PostUp OK");
 
         $this->db->logEnd($bucket, ForgeUpgrade_Db::STATUS_SUCCESS);
-
+        
     }
             
     /**
@@ -240,25 +248,27 @@ class ForgeUpgrade {
         $log = $this->log();
         $log->info('Start running migrations...');
 
+
+        $log2 = clone $log;
         if (!$this->options['core']['force']) {
             try {
                 foreach ($buckets as $bucket) {
-                    $this->runUpBucket($bucket);
+                    $this->runUpBucket($bucket , &$log2);
                 }
 
             } catch (Exception $e) {
                 // Use the last defined $log (so error messages are attached to the
                 // right bucket in DB)
-                $log->error($e->getMessage());
+                $log2->error($e->getMessage());
                 $this->db->logEnd($bucket, ForgeUpgrade_Db::STATUS_FAILURE);
             }
              
         } else {
             foreach ($buckets as $bucket) {
                 try {
-                    $this->runUpBucket($bucket);
+                    $this->runUpBucket($bucket, &$log2);
                 } catch (Exception $e) {
-                    $log->error($e->getMessage());
+                    $log2->error($e->getMessage());
                     $this->db->logEnd($bucket, ForgeUpgrade_Db::STATUS_FAILURE);
                 }
             }
