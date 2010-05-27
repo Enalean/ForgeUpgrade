@@ -53,6 +53,10 @@ class ForgeUpgrade {
 
     protected $includePaths = array();
     protected $excludePaths = array();
+    
+    protected $forceOption;
+    protected $ignorePreUpOption;
+    
 
     /**
      * Constructor
@@ -70,6 +74,15 @@ class ForgeUpgrade {
     function setExcludePaths($paths) {
         $this->excludePaths = $paths;
     }
+    
+    function setIgnorePreUpOption($ignorePreUp) {
+        $this->ignorePreUpOption = $ignorePreUp;
+    }
+    
+    function setForceOption($force) {
+        $this->forceOption = $force;
+    }
+    
     
     /**
      * Run all available migrations
@@ -106,10 +119,6 @@ class ForgeUpgrade {
                     $this->runPreUp($buckets);
                     break;
 
-                case 'ignore-preup':
-                    $this->doIgnorePreUp($buckets);
-                    break;
-
             }
         } else {
             $this->log()->info('System up-to-date');
@@ -131,14 +140,15 @@ class ForgeUpgrade {
     }
     
     protected function doUpdate($buckets) {
-        if ($this->runPreUp($buckets)) {
-            $this->runUp($buckets);
+        if (!$this->ignorePreUpOption) {
+            if ($this->runPreUp($buckets)) {
+                $this->runUp($buckets);
+            }
+        } else {
+             $this->runUp($buckets);
         }
     }
 
-    protected function doIgnorePreUp($buckets) {
-        $this->runUp($buckets);
-    }
 
     protected function doCheckUpdate($buckets) {
         foreach ($buckets as $bucket) {
@@ -185,48 +195,68 @@ class ForgeUpgrade {
         return $result;
     }
 
+    public function runUpBucket($bucket) {
+        $this->db->logStart($bucket);
+        // Prepare a specific logger that will be used to store all
+        // Bucket traces into the database so the buckets and it's logs
+        // will be linked
+        $log = Logger::getLogger(get_class());
+        $log->addAppender($this->dbDriver->getBucketLoggerAppender($bucket));
+        $bucket->setLoggerParent($log);
+
+        $log->info("Processing ".get_class($bucket));
+
+        $bucket->preUp();
+        $log->info("PreUp OK");
+
+        $bucket->up();
+        $log->info("Up OK");
+
+        $bucket->postUp();
+        $log->info("PostUp OK");
+
+        $this->db->logEnd($bucket, ForgeUpgrade_Db::STATUS_SUCCESS);
+
+    }
+            
     /**
      * Load all migrations and execute them
-     *
+     * 
+     * If force option is set, all buckets will be run even if it fails 
+     * Else if not, buckets' execution will drop since one bucket fails 
      * @param String $scriptPath Path to the script to execute
      *
      * @return void
      */
     protected function runUp($buckets) {
-        try {
-            $log = $this->log();
-            $log->info('Start running migrations...');
-            foreach ($buckets as $bucket) {
-                $this->db->logStart($bucket);
+        $log = $this->log();
+        $log->info('Start running migrations...');
 
-                // Prepare a specific logger that will be used to store all
-                // Bucket traces into the database so the buckets and it's logs
-                // will be linked
-                $log = Logger::getLogger(get_class());
-                $log->addAppender($this->dbDriver->getBucketLoggerAppender($bucket));
-                $bucket->setLoggerParent($log);
+        if (!$this->forceOption) {
+            try {
+                foreach ($buckets as $bucket) {
+                    $this->runUpBucket($bucket);
+                }
 
-                $log->info("Processing ".get_class($bucket));
-
-                $bucket->preUp();
-                $log->info("PreUp OK");
-
-                $bucket->up();
-                $log->info("Up OK");
-
-                $bucket->postUp();
-                $log->info("PostUp OK");
-
-                $this->db->logEnd($bucket, ForgeUpgrade_Db::STATUS_SUCCESS);
+            } catch (Exception $e) {
+                // Use the last defined $log (so error messages are attached to the
+                // right bucket in DB)
+                $log->error($e->getMessage());
+                $this->db->logEnd($bucket, ForgeUpgrade_Db::STATUS_FAILURE);
             }
-        } catch (Exception $e) {
-            // Use the last defined $log (so error messages are attached to the
-            // right bucket in DB)
-            $log->error($e->getMessage());
-            $this->db->logEnd($bucket, ForgeUpgrade_Db::STATUS_FAILURE);
+             
+        } else {
+            foreach ($buckets as $bucket) {
+                try {
+                    $this->runUpBucket($bucket);
+                } catch (Exception $e) {
+                    $log->error($e->getMessage());
+                    $this->db->logEnd($bucket, ForgeUpgrade_Db::STATUS_FAILURE);
+                }
+            }
+
         }
     }
-
     protected function getMigrationBuckets($dirPath) {
         $this->log()->debug("Look for buckets in $dirPath");
         $buckets = $this->getAllMigrationBuckets($dirPath);

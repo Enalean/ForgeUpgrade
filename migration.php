@@ -44,7 +44,6 @@ for ($i = 1; $i < $argc; $i++) {
         case 'check-update':
         case 'run-pre':
         case 'already-applied':
-        case 'ignore-preup':
             $func = $argv[$i];
             break;
     }
@@ -89,6 +88,17 @@ for ($i = 1; $i < $argc; $i++) {
             }
         }
     }
+    
+    //--ignore-preup
+    if (preg_match('/--ignore-preup/',$argv[$i], $matches)) {
+        $ignorePreUp = true;
+    }
+    
+    //--force
+    if (preg_match('/--force/',$argv[$i], $matches)) {
+        $force = true;
+    }
+ 
 }
 
 if ($func == 'help') {
@@ -117,6 +127,8 @@ $logger->addAppender($appender);
 $upg = new ForgeUpgrade($dbDriver);
 $upg->setIncludePaths($includePaths);
 $upg->setExcludePaths($excludePaths);
+$upg->setIgnorePreUpOption($ignorePreUp);
+$upg->setForceOption($force);
 $upg->run($func, $paths);
 
 //
@@ -137,7 +149,6 @@ run-pre          Run pending migration buckets "pre" checks
 update           Execute pending migration buckets
 record-only      Record all available buckets as executed in the database without
                  actually executing them
-ignore-preup     Execute migration buckets whithout running "pre" checks
 
 Options:
   --path=[/path]           Path where to find migration buckets [default: current dir]
@@ -146,6 +157,9 @@ Options:
 
   --dbdriver=[name|/path]  The database driver to use (either a name or a path
                            to the driver file for custom ones).
+  --ignore-preup     Execute migration buckets whithout running "pre" checks
+  --force            Execute migration buckets even there are errors  
+                           
 
 EOT;
 }
