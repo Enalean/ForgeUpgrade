@@ -39,6 +39,10 @@ abstract class ForgeUpgrade_Bucket {
         $this->log    = Logger::getLogger(get_class());
     }
 
+    public function setAllApi(array $api) {
+        $this->api = $api;
+    }
+
     public function setApi($api) {
         $this->api[get_class($api)] = $api;
     }

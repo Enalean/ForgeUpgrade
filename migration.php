@@ -31,9 +31,13 @@ require 'src/LoggerAppenderConsoleColor.php';
 
 // Parameters
 $func         = 'help';
-$paths        = array();
-$includePaths = array();
-$excludePaths = array();
+$options['core']['path']         = array();
+$options['core']['include_path'] = array();
+$options['core']['exclude_path'] = array();
+$options['core']['dbdriver']     = null;
+$options['core']['ignore_preup'] = false;
+$options['core']['force']        = false;
+
 for ($i = 1; $i < $argc; $i++) {
     //
     // Commands
@@ -51,10 +55,17 @@ for ($i = 1; $i < $argc; $i++) {
     //
     // Options
 
+    // --config
+    if (preg_match('/--config=(.*)/',$argv[$i], $matches)) {
+        if (is_file($matches[1])) {
+            $options = parse_ini_file($matches[1], true);
+        }
+    }
+    
     // --path
     if (preg_match('/--path=(.*)/',$argv[$i], $matches)) {
         if (is_dir($matches[1]) || is_file($matches[1])) {
-            $paths[] = $matches[1];
+            $options['core']['path'][] = $matches[1];
         } else {
             echo 'Error "'.$matches[1].'" is not a valid directory'.PHP_EOL;
         }
@@ -62,43 +73,28 @@ for ($i = 1; $i < $argc; $i++) {
 
     // --include
     if (preg_match('/--include=(.*)/',$argv[$i], $matches)) {
-        $includePaths[] = surroundBy($matches[1], '/');
+        $options['core']['include_path'][] = surroundBy($matches[1], '/');
     }
 
     // --exclude
     if (preg_match('/--exclude=(.*)/',$argv[$i], $matches)) {
-        $excludePaths[] = surroundBy($matches[1], '/');
+        $options['core']['exclude_path'][] = surroundBy($matches[1], '/');
     }
     
     // --driver
     if (preg_match('/--dbdriver=(.*)/',$argv[$i], $matches)) {
-        // First try the file
-        if (is_file($matches[1])) {
-            require $matches[1];
-            $className = $matches[1];
-            $dbDriverName = basename($matches[1], '.php');
-        } else {
-            $dbDriverName = ucfirst(strtolower($matches[1]));
-            $filePath = 'src/db/driver/'.$dbDriverName.'.php';
-            if (is_file($filePath)) {
-                require $filePath;
-                $dbDriverName = 'ForgeUpgrade_Db_Driver_'.$dbDriverName;
-            } else {
-                echo "Error: invalid --dbdriver".PHP_EOL;
-            }
-        }
+        $options['core']['dbdriver'] = $matches[1];
     }
     
     //--ignore-preup
     if (preg_match('/--ignore-preup/',$argv[$i], $matches)) {
-        $ignorePreUp = true;
+        $options['core']['ignore_preup'] = true;
     }
     
     //--force
     if (preg_match('/--force/',$argv[$i], $matches)) {
-        $force = true;
+        $options['core']['force'] = true;
     }
- 
 }
 
 if ($func == 'help') {
@@ -107,6 +103,21 @@ if ($func == 'help') {
 }
 
 // Get the DB connexion
+// First try the file
+if (is_file($options['core']['dbdriver'])) {
+    require $options['core']['dbdriver'];
+    //$className = $options['core']['dbdriver'];
+    $dbDriverName = basename($options['core']['dbdriver'], '.php');
+} else {
+    $dbDriverName = ucfirst(strtolower($options['core']['dbdriver']));
+    $filePath = 'src/db/driver/'.$dbDriverName.'.php';
+    if (is_file($filePath)) {
+        require $filePath;
+        $dbDriverName = 'ForgeUpgrade_Db_Driver_'.$dbDriverName;
+    } else {
+        echo "Error: invalid --dbdriver".PHP_EOL;
+    }
+}
 try {
     $dbDriver = new $dbDriverName();
 } catch (PDOException $e) {
@@ -114,7 +125,7 @@ try {
     return -1;
 }
 
-// Go
+// Special logger to display nice colors according to levels
 $logger = Logger::getRootLogger();
 $logger->removeAllAppenders();
 $appender = new LoggerAppenderConsoleColor('LoggerAppenderConsoleColor');
@@ -122,14 +133,21 @@ $appender->setLayout( new LoggerLayoutTTCC() );
 $appender->activateOptions();
 $logger->addAppender($appender);
 
-
-
+// Go
 $upg = new ForgeUpgrade($dbDriver);
-$upg->setIncludePaths($includePaths);
-$upg->setExcludePaths($excludePaths);
-$upg->setIgnorePreUpOption($ignorePreUp);
-$upg->setForceOption($force);
-$upg->run($func, $paths);
+if (isset($options['core']['include_path'])) {
+    $upg->setIncludePaths($options['core']['include_path']);
+}
+if (isset($options['core']['exclude_path'])) {
+    $upg->setExcludePaths($options['core']['exclude_path']);
+}
+if (isset($options['core']['ignore_preup'])) {
+    $upg->setIgnorePreUpOption($options['core']['ignore_preup']);
+}
+if (isset($options['core']['force'])) {
+    $upg->setForceOption($options['core']['force']);
+}
+$upg->run($func, $options['core']['path']);
 
 //
 // Function definitions
@@ -151,6 +169,7 @@ record-only      Record all available buckets as executed in the database withou
                  actually executing them
 
 Options:
+  --config=[/path]         Path to ForgeUpgrade config file (you can define all options in a config.ini file)
   --path=[/path]           Path where to find migration buckets [default: current dir]
   --include=[/path]        Only consider paths that contains given pattern
   --exclude=[/path]        Don't consider paths that contains given pattern

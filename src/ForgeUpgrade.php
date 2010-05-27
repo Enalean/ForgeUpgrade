@@ -37,9 +37,10 @@ class ForgeUpgrade {
     protected $db;
 
     /**
-     * @var ForgeUpgrade_BucketDb
+     * Contains all bucket API
+     * @var Array
      */
-    protected $bucketDb;
+    protected $bucketApi = array();
 
     /**
      * @var Logger
@@ -64,7 +65,7 @@ class ForgeUpgrade {
     public function __construct(ForgeUpgrade_Db_Driver_Abstract $dbDriver) {
         $this->dbDriver = $dbDriver;
         $this->db       = new ForgeUpgrade_Db($dbDriver->getPdo());
-        $this->bucketDb = new ForgeUpgrade_Bucket_Db($dbDriver->getPdo());
+        $this->bucketApi['ForgeUpgrade_Bucket_Db'] = new ForgeUpgrade_Bucket_Db($dbDriver->getPdo());
     }
 
     function setIncludePaths($paths) {
@@ -356,8 +357,7 @@ class ForgeUpgrade {
      * @return void
      */
     protected function addBucketApis(ForgeUpgrade_Bucket $bucket) {
-        // Simple db api
-        $bucket->setApi($this->bucketDb);
+        $bucket->setAllApi($this->bucketApi);
     }
 
     /**
