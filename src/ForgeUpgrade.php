@@ -64,6 +64,8 @@ class ForgeUpgrade {
     /**
      * Set all options of forge upgrade
      * 
+     * If an option is not set, fill with default
+     * 
      * @param Array $options
      * 
      * @return void
