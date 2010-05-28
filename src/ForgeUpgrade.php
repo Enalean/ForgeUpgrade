@@ -211,10 +211,12 @@ class ForgeUpgrade {
      */
     public function runUpBucket($bucket, $log) {
         $this->db->logStart($bucket);
+
         // Prepare a specific logger that will be used to store all
         // Bucket traces into the database so the buckets and it's logs
         // will be linked
-        $log->addAppender($this->dbDriver->getBucketLoggerAppender($bucket));
+        $bucketAppender = $this->dbDriver->getBucketLoggerAppender($bucket);
+        $log->addAppender($bucketAppender);
         $bucket->setLoggerParent($log);
         
         $log->info("Processing ".get_class($bucket));
@@ -229,7 +231,9 @@ class ForgeUpgrade {
 
         $bucket->postUp();
         $log->info("PostUp OK");
+
         $this->db->logEnd($bucket, ForgeUpgrade_Db::STATUS_SUCCESS);
+        $log->removeAppender($bucketAppender);
     }
 
     /**
