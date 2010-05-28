@@ -204,22 +204,6 @@ class ForgeUpgrade {
     }
 
     /**
-     * Prepare a specific logger that will be used to store all
-     * Bucket traces into the database so the buckets and it's logs
-     * will be linked
-     * 
-     * @param ForgeUpgrade_Bucket $bucket
-     * 
-     * @return Logger
-     */
-    protected function addBucketLogger(ForgeUpgrade_Bucket $bucket) {
-        $log = clone $this->log;
-        $log->addAppender($this->dbDriver->getBucketLoggerAppender($bucket));
-        $bucket->setLoggerParent($log);
-        return $log;
-    }
-
-    /**
      * It executes the bucket and logs its status 
      * 
      * @param ForgeUpgrade_Bucket  $bucket
@@ -227,6 +211,9 @@ class ForgeUpgrade {
      */
     public function runUpBucket($bucket, $log) {
         $this->db->logStart($bucket);
+        // Prepare a specific logger that will be used to store all
+        // Bucket traces into the database so the buckets and it's logs
+        // will be linked
         $log->addAppender($this->dbDriver->getBucketLoggerAppender($bucket));
         $bucket->setLoggerParent($log);
         
