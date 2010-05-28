@@ -132,6 +132,12 @@ $upg = new ForgeUpgrade($dbDriver);
 $upg->setOptions($options);
 $upg->run($func);
 
+unset($upg);
+
+        var_dump('test2');
+
+        unset($logger);
+        var_dump('test3');
 //
 // Function definitions
 //

@@ -12,6 +12,10 @@ Change the storage engine from MyIsam to InnoDb for statistics tables
 EOT;
     }
     
+    public function preUp() {
+        $this->db = $this->getApi('ForgeUpgrade_Bucket_Db');
+    }
+    
     public function up() {
         $sql = ' ALTER TABLE plugin_statistics_user_session TYPE= INNODB';
         $this->db->alterTable('plugin_statistics_user_session', 'INFORMATION_SCHEMA.TABLES', 'engine = "INNODB"', $sql);
