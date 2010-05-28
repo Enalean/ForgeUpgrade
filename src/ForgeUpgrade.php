@@ -245,29 +245,31 @@ class ForgeUpgrade {
         $log = $this->log();
         $log->info('Start running migrations...');
 
-        $bucketLogger = clone $this->log;
+        // Keep original logger: $log will be modified in runUpBucket in order
+        // to store results in the database attached to the bucket.
+        $origLogger = clone $log;
         if (!$this->options['core']['force']) {
             try {
                 foreach ($buckets as $bucket) {
-                    $this->runUpBucket($bucket, $bucketLogger);
+                    $this->runUpBucket($bucket, $log);
                     unset($bucket);
                 }
             } catch (Exception $e) {
-                $bucketLogger->error($e->getMessage());
+                $log->error($e->getMessage());
                 $this->db->logEnd($bucket, ForgeUpgrade_Db::STATUS_FAILURE);
             }
         } else {
             foreach ($buckets as $bucket) {
                 try {
-                    $this->runUpBucket($bucket, $bucketLogger);
+                    $this->runUpBucket($bucket, $log);
                     unset($bucket);
                 } catch (Exception $e) {
-                    $bucketLogger->error($e->getMessage());
+                    $log->error($e->getMessage());
                     $this->db->logEnd($bucket, ForgeUpgrade_Db::STATUS_FAILURE);
                 }
             }
         }
-        unset($bucketLogger);
+        $log = $origLogger;
     }
 
     protected function getMigrationBuckets($dirPath) {
