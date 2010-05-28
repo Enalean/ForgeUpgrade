@@ -108,7 +108,7 @@ class ForgeUpgrade {
             $this->log()->error('No migration path');
             return false;
         }
-        $buckets = $this->getMigrationBuckets($this->options['core']['path'][0]);
+        $buckets = $this->getBucketsToProceed($this->options['core']['path']);
         if (count($buckets) > 0) {
             switch ($func) {
                 case 'record-only':
@@ -276,18 +276,24 @@ class ForgeUpgrade {
         $log = $origLogger;
     }
 
-    protected function getMigrationBuckets($dirPath) {
-        $this->log()->debug("Look for buckets in $dirPath");
-        $buckets = $this->getAllMigrationBuckets($dirPath);
-        $sth = $this->db->getAllBuckets(array(ForgeUpgrade_Db::STATUS_SUCCESS, ForgeUpgrade_Db::STATUS_SKIP));
-        foreach($sth as $row) {
-            $key = basename($row['script']);
-            if (isset($buckets[$key])) {
-                $this->log()->debug("Remove (already applied): $key");
-                unset($buckets[$key]);
+    /**
+     * Return all the buckets not already applied
+     * 
+     * @param array $dirPath
+     */
+    protected function getBucketsToProceed(array $dirPath) {
+        if (!isset($this->buckets)) {
+            $this->buckets = $this->getAllBuckets($dirPath);
+            $sth           = $this->db->getAllBuckets(array(ForgeUpgrade_Db::STATUS_SUCCESS, ForgeUpgrade_Db::STATUS_SKIP));
+            foreach($sth as $row) {
+                $key = basename($row['script']);
+                if (isset($this->buckets[$key])) {
+                    $this->log()->debug("Remove (already applied): $key");
+                    unset($this->buckets[$key]);
+                }
             }
         }
-        return $buckets;
+        return $this->buckets;
     }
 
     /**
@@ -295,20 +301,31 @@ class ForgeUpgrade {
      *
      * @return Array of SplFileInfo
      */
-    public function getAllMigrationBuckets($path) {
-        if (!isset($this->buckets)) {
-            $this->buckets = array();
-            if (is_dir($path)) {
-                $iter = $this->getBucketFinderIterator($path);
-                foreach ($iter as $file) {
-                    $this->queueMigrationBucket($file);
-                }
-            } else {
-                $this->queueMigrationBucket(new SplFileInfo($path));
-            }
-            ksort($this->buckets, SORT_STRING);
+    protected function getAllBuckets(array $paths) {
+        $buckets = array();
+        foreach($paths as $path) {
+            $this->log()->debug("Look for buckets in $path");
+            $this->findAllBucketsInPath($path, $buckets);
         }
-        return $this->buckets;
+        ksort($buckets, SORT_STRING);
+        return $buckets;
+    }
+
+    /**
+     * Fill $buckets array with all available buckets in $path
+     * 
+     * @param String $path
+     * @param Array $buckets
+     */
+    protected function findAllBucketsInPath($path, &$buckets) {
+        if (is_dir($path)) {
+            $iter = $this->getBucketFinderIterator($path);
+            foreach ($iter as $file) {
+                $this->queueMigrationBucket($file, $buckets);
+            }
+        } else {
+            $this->queueMigrationBucket(new SplFileInfo($path), $buckets);
+        }
     }
 
     /**
@@ -334,12 +351,12 @@ class ForgeUpgrade {
      * 
      * @return void
      */
-    protected function queueMigrationBucket(SplFileInfo $file) {
+    protected function queueMigrationBucket(SplFileInfo $file, &$buckets) {
         if ($file->isFile()) {
             $object = $this->getBucketClass($file);
             if ($object) {
                 $this->log()->debug("Valid bucket: $file");
-                $this->buckets[basename($file->getPathname())] = $object;
+                $buckets[basename($file->getPathname())] = $object;
             } else {
                 $this->log()->debug("Invalid bucket: $file");
             }
