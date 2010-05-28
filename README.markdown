@@ -98,3 +98,10 @@ path[]=/usr/share/codendi/src/plugins/ldap"
 path[]=/usr/share/codendi/src/plugins/forumml"
 -----------
 </pre>
+
+In this case, the target application should take care to modify the config.ini
+in order to add the path of each installed plugin and to remove them on plugin
+uninstall.
+In the very same spirit, on plugin install, it should trigger a --record-only
+call with the plugin path
+
