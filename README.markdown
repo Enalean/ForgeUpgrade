@@ -58,7 +58,7 @@ Wed Apr 14 18:01:40 2010,812 [30794] INFO ForgeUpgrade - [Up] AddDateColumnToIte
 Dedicated db driver
 ===================
 
-Instead of writing down your db crendentials in the config.ini file, you can
+Instead of writing down your db credentials in the config.ini file, you can
 develop your own db driver that will be able to read your application db config
 file.
 
@@ -74,3 +74,27 @@ Then, just use --dbdriver= option with the path of the file to use as driver
 
 You can have a look at examples/CustomDrivers/ForgeUpgrade_Db_Driver_Codendi.php
 for more details
+
+How to manage target application plugins
+========================================
+
+You might face a situation where you application comes with plugins that are 
+delivered with the application but not installed.
+In this case, you should not apply buckets on the plugins (it would break).
+As ForgeUpgrade as no information about the application it cannot see in the
+application DB if the plugin is installed or not.
+
+To avoid to apply buckets on non installed plugin, you should describe in your
+config.ini the list of path ForgeUpgrade should take care and only reference
+the path of installed plugins.
+Example: Codendi with only ldap and forumml plugins (there are more than 10 other
+plugins available by default):
+<pre>
+-----------
+[core]
+dbdriver="/usr/share/codendi/src/updates/api/ForgeUpgrade_Db_Driver_Codendi.php"
+path[]="/usr/share/codendi/src"
+path[]=/usr/share/codendi/src/plugins/ldap"
+path[]=/usr/share/codendi/src/plugins/forumml"
+-----------
+</pre>
