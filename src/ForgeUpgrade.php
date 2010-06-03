@@ -133,31 +133,56 @@ class ForgeUpgrade {
         }
     }
 
+    /**
+     * Displays detailed bucket's logs for a given script if path is entered
+     * Else it will show the status of all buckets 
+     */
     protected function doAlreadyApplied() {
         $color = '';
-        foreach ($this->db->getAllBuckets() as $row) {
-            $status = $this->db->statusLabel($row['status']);
 
-            switch ($status) {
-                case 'failure':
+        if (count($this->options['core']['path']) == 1) {
+            $bucket = $this->getBucketClass(new SplFileInfo($this->options['core']['path'][0]));
+
+            foreach ($this->db->getBucketsLogs($bucket->getPath()) as $row) {
+                $level = $row['level'];
+                switch ($level) {
+                    case 'ERROR':
                     $color = LoggerAppenderConsoleColor::RED;
                     break;
 
-                case 'success':
+                    case 'INFO':
                     $color = LoggerAppenderConsoleColor::GREEN;
                     break;
-                
-                case 'skipped':
+
+                    default:
+                    break;
+                }
+                echo $color.($row['timestamp']."  ".$level."  ".$row['message'].PHP_EOL.LoggerAppenderConsoleColor::NOCOLOR);
+            }
+        } else {
+            foreach ($this->db->getAllBuckets() as $row) {
+                $status = $this->db->statusLabel($row['status']);
+                switch ($status) {
+                    case 'failure':
+                    $color = LoggerAppenderConsoleColor::RED;
+                    break;
+
+                    case 'success':
+                    $color = LoggerAppenderConsoleColor::GREEN;
+                    break;
+
+                    case 'skipped':
                     $color = LoggerAppenderConsoleColor::YELLOW;
                     break;
 
-                default:
+                    default:
                     break;
-            }
-            echo $color.($row['start_date']."  ".ucfirst($status)."  ".$row['script'].PHP_EOL.LoggerAppenderConsoleColor::NOCOLOR);
+               }
+               echo $color.($row['start_date']."  ".ucfirst($status)."  ".$row['script'].PHP_EOL.LoggerAppenderConsoleColor::NOCOLOR);
+           }
         }
     }
-    
+
     protected function doRecordOnly($buckets) {
         foreach ($buckets as $bucket) {
             $this->log()->info("[doRecordOnly] ".get_class($bucket));

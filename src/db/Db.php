@@ -31,6 +31,7 @@ class ForgeUpgrade_Db {
     public function __construct(PDO $dbh) {
         $this->dbh = $dbh;
         $this->t['bucket'] = 'forge_upgrade_bucket';
+        $this->t['log'] = 'forge_upgrade_log';
     }
 
     public static function statusLabel($status) {
@@ -63,6 +64,34 @@ class ForgeUpgrade_Db {
             $stmt   = ' WHERE status IN ('.implode(',', $escapedStatus).')';
         }
         return $this->dbh->query('SELECT * FROM '.$this->t['bucket'].$stmt.' ORDER BY start_date ASC');
+    }
+
+    /**
+     * returns buckets Id corresponding to  a given script path
+     * 
+     * @param String $bucketPath
+     * 
+     * @return Array
+     */
+    public function getBucketsIds($bucketPath) {
+        $res = $this->dbh->query('SELECT id FROM '.$this->t['bucket'].' WHERE script = "'.$bucketPath.'" ORDER BY start_date ASC');
+
+        $bucketIds =array();
+        foreach ($res as $row) {
+            $bucketIds[] = $row['id'];
+        }
+        return $bucketIds; 
+    }
+
+    /**
+     * Returns logs for a given buckets
+     * 
+     * @param String $bucketPath
+     */
+    
+    public function getBucketsLogs($bucketPath) {
+        $bucketIds = $this->getBucketsIds($bucketPath);
+        return $this->dbh->query('SELECT * FROM '.$this->t['log'].' WHERE bucket_id IN ('.implode(',', $bucketIds).')');
     }
 
 }
