@@ -32,6 +32,7 @@ require 'src/LoggerAppenderConsoleColor.php';
 // Parameters
 $func    = 'help';
 $options = array();
+$level   = 'INFO';
 for ($i = 1; $i < $argc; $i++) {
     //
     // Commands
@@ -89,6 +90,11 @@ for ($i = 1; $i < $argc; $i++) {
     if (preg_match('/--force/',$argv[$i], $matches)) {
         $options['core']['force'] = true;
     }
+    
+    // --level
+    if (preg_match('/--verbose=(.*)/',$argv[$i], $matches)) {
+        $level = LoggerLevel::toLevel($matches[1], 'INFO');
+    }
 }
 
 if ($func == 'help') {
@@ -123,7 +129,8 @@ try {
 $logger = Logger::getRootLogger();
 $logger->removeAllAppenders();
 $appender = new LoggerAppenderConsoleColor('LoggerAppenderConsoleColor');
-$appender->setLayout( new LoggerLayoutTTCC() );
+$appender->setLayout( new LoggerLayoutSimple() );
+$appender->setThreshold($level);
 $appender->activateOptions();
 $logger->addAppender($appender);
 
@@ -159,9 +166,10 @@ Options:
 
   --dbdriver=[name|/path]  The database driver to use (either a name or a path
                            to the driver file for custom ones).
-  --ignore-preup     Execute migration buckets whithout running "pre" checks
-  --force            Execute migration buckets even there are errors  
-                           
+  --ignore-preup           Execute migration buckets whithout running "pre" checks
+  --force                  Execute migration buckets even there are errors  
+  --verbose=[level]        How verbose: ALL, DEBUG, INFO, WARN, ERROR, FATAL, OFF
+                           Default: INFO
 
 EOT;
 }
