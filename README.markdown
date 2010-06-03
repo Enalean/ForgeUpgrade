@@ -105,3 +105,5 @@ uninstall.
 In the very same spirit, on plugin install, it should trigger a --record-only
 call with the plugin path
 
+Write a bucket
+==============
