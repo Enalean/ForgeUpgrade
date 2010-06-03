@@ -134,8 +134,27 @@ class ForgeUpgrade {
     }
 
     protected function doAlreadyApplied() {
+        $color = '';
         foreach ($this->db->getAllBuckets() as $row) {
-            echo $row['start_date']."  ".ucfirst($this->db->statusLabel($row['status']))."  ".$row['script'].PHP_EOL;
+            $status = $this->db->statusLabel($row['status']);
+
+            switch ($status) {
+                case 'failure':
+                    $color = LoggerAppenderConsoleColor::RED;
+                    break;
+
+                case 'success':
+                    $color = LoggerAppenderConsoleColor::GREEN;
+                    break;
+                
+                case 'skipped':
+                    $color = LoggerAppenderConsoleColor::YELLOW;
+                    break;
+
+                default:
+                    break;
+            }
+            echo $color.($row['start_date']."  ".ucfirst($status)."  ".$row['script'].PHP_EOL.LoggerAppenderConsoleColor::NOCOLOR);
         }
     }
     
