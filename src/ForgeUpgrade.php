@@ -139,23 +139,28 @@ class ForgeUpgrade {
      */
     protected function doAlreadyApplied() {
         $color = '';
-
-        if (count($this->options['core']['path']) == 1) {
-            $bucket = $this->getBucketClass(new SplFileInfo($this->options['core']['path'][0]));
-
-            foreach ($this->db->getBucketsLogs($bucket->getPath()) as $row) {
+        if ($this->options['core']['bucket']) {
+            foreach ($this->db->getBucketsLogs($this->options['core']['bucket']) as $row) {
                 $level = $row['level'];
                 switch ($level) {
                     case 'ERROR':
-                    $color = LoggerAppenderConsoleColor::RED;
-                    break;
+                        $color = LoggerAppenderConsoleColor::RED;
+                        break;
 
                     case 'INFO':
-                    $color = LoggerAppenderConsoleColor::GREEN;
-                    break;
+                        $color = LoggerAppenderConsoleColor::GREEN;
+                        break;
+
+                    case 'WARN':
+                        $color = LoggerAppenderConsoleColor::YELLOW;
+                        break;
+
+                    case 'FATAL':
+                        $color = LoggerAppenderConsoleColor::BLACK.LoggerAppenderConsoleColor::BG_RED;
+                        break;
 
                     default:
-                    break;
+                        break;
                 }
                 echo $color.($row['timestamp']."  ".$level."  ".$row['message'].PHP_EOL.LoggerAppenderConsoleColor::NOCOLOR);
             }
