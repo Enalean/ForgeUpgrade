@@ -7,6 +7,8 @@
 $name = $argv[$argc - 1];
 
 
+// Set the default timezone to use. 
+date_default_timezone_set('UTC');
 
 $filename = date('YmdHi', $_SERVER['REQUEST_TIME']).'_'.unCapitalize($name).'.php';
 
