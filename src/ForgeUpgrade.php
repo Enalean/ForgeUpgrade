@@ -133,58 +133,60 @@ class ForgeUpgrade {
         }
     }
 
+
     /**
-     * Displays detailed bucket's logs for a given script if path is entered
-     * Else it will show the status of all buckets 
+     * Displays detailed bucket's logs for a given bucket Id
+     * 
+     * @param Integer $bucketId
      */
-    protected function doAlreadyApplied() {
-        $color = '';
-        if ($this->options['core']['bucket']) {
-            foreach ($this->db->getBucketsLogs($this->options['core']['bucket']) as $row) {
+    protected function displayAlreadyAppliedPerBucket($bucketId) {
+        foreach ($this->db->getBucketsLogs($bucketId) as $row) {
                 $level = $row['level'];
-                switch ($level) {
-                    case 'ERROR':
-                        $color = LoggerAppenderConsoleColor::RED;
-                        break;
+                $message = $row['start_date']."  ".ucfirst($this->db->statusLabel($row['status']))."  ".
+                     $row['script']."  ".$level."  ".$row['message'].PHP_EOL;
+                echo LoggerAppenderConsoleColor::chooseColor($level, $message);
+        }
+    }
 
-                    case 'INFO':
-                        $color = LoggerAppenderConsoleColor::GREEN;
-                        break;
 
-                    case 'WARN':
-                        $color = LoggerAppenderConsoleColor::YELLOW;
-                        break;
-
-                    case 'FATAL':
-                        $color = LoggerAppenderConsoleColor::BLACK.LoggerAppenderConsoleColor::BG_RED;
-                        break;
-
-                    default:
-                        break;
-                }
-                echo $color.($row['timestamp']."  ".$level."  ".$row['message'].PHP_EOL.LoggerAppenderConsoleColor::NOCOLOR);
-            }
-        } else {
-            foreach ($this->db->getAllBuckets() as $row) {
-                $status = $this->db->statusLabel($row['status']);
-                switch ($status) {
-                    case 'failure':
+    /**
+     * Displays logs of all buckets already applied 
+     */
+    protected function displayAlreadyAppliedForAllBuckets() {
+        $color = '';
+        foreach ($this->db->getAllBuckets() as $row) {
+            $status = $this->db->statusLabel($row['status']);
+            switch ($status) {
+                case 'failure':
                     $color = LoggerAppenderConsoleColor::RED;
                     break;
 
-                    case 'success':
+                case 'success':
                     $color = LoggerAppenderConsoleColor::GREEN;
                     break;
 
-                    case 'skipped':
+                case 'skipped':
                     $color = LoggerAppenderConsoleColor::YELLOW;
                     break;
 
-                    default:
+                default:
                     break;
-               }
-               echo $color.($row['start_date']."  ".ucfirst($status)."  ".$row['script'].PHP_EOL.LoggerAppenderConsoleColor::NOCOLOR);
-           }
+                }
+            echo $color.($row['start_date']."  ".ucfirst($status)."  ".$row['id']."  ".$row['script'].PHP_EOL.LoggerAppenderConsoleColor::NOCOLOR);
+           
+        }
+    }
+
+
+    /**
+     * Displays detailed bucket's logs for a given bucket Id 
+     * Or all buckets' logs according to the option "bucket" is filled or not
+     */
+    protected function doAlreadyApplied() {
+        if ($this->options['core']['bucket']) {
+            $this->displayAlreadyAppliedPerBucket($this->options['core']['bucket']);
+        } else {
+            $this->displayAlreadyAppliedForAllBuckets();
         }
     }
 
@@ -195,7 +197,7 @@ class ForgeUpgrade {
             $this->db->logEnd($bucket, ForgeUpgrade_Db::STATUS_SKIP);
         }
     }
-    
+
     protected function doUpdate($buckets) {
         if (!$this->options['core']['ignore_preup']) {
             if ($this->runPreUp($buckets)) {

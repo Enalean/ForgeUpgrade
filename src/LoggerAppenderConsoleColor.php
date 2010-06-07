@@ -10,14 +10,16 @@ class LoggerAppenderConsoleColor extends LoggerAppenderConsole {
     const NOCOLOR = "\033[0m";
 
     /**
-     * Display coloried messages on console
+     * Format message aaccording to given level 
      *
-     * @param LoggerLoggingEvent $event
+     * @param String $level
+     * @param String $message
+     * 
      * @return string
      */
-    public function colorize(LoggerLoggingEvent $event) {
+    public function chooseColor($level, $message) {
         $color = null;
-        switch ($event->getLevel()->toString()) {
+        switch ($level) {
             case 'INFO':
                 $color = self::GREEN;
                 break;
@@ -31,12 +33,21 @@ class LoggerAppenderConsoleColor extends LoggerAppenderConsole {
                 $color = self::BLACK.self::BG_RED;
                 break;
         }
-        $format = $this->layout->format($event);
         if ($color) {
-            $format = $color.$format.self::NOCOLOR;
+            $message = $color.$message.self::NOCOLOR;
         }
-        return $format;
+        return $message;
     }
+
+    /**
+     * Display coloried messages on console
+     *
+     * @param LoggerLoggingEvent $event
+     * @return string
+     */
+    public function colorize(LoggerLoggingEvent $event) {
+        return $this->chooseColor($event->getLevel()->toString(), $this->layout->format($event));
+     }
 
 
     public function append(LoggerLoggingEvent $event) {

@@ -74,7 +74,7 @@ class ForgeUpgrade_Db {
      */
 
     public function getBucketsLogs($bucketId) {
-        return $this->dbh->query('SELECT * FROM '.$this->t['log'].' WHERE bucket_id='.$bucketId);
+        return $this->dbh->query('SELECT * FROM '.$this->t['log'].', '.$this->t['bucket'].' t WHERE bucket_id='.$bucketId.' AND t.id ='.$bucketId);
     }
 
 }
