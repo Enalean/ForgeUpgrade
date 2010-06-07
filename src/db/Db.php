@@ -74,7 +74,9 @@ class ForgeUpgrade_Db {
      */
 
     public function getBucketsLogs($bucketId) {
-        return $this->dbh->query('SELECT * FROM '.$this->t['log'].', '.$this->t['bucket'].' t WHERE bucket_id='.$bucketId.' AND t.id ='.$bucketId);
+        return $this->dbh->query(' SELECT * , TIMEDIFF(t.end_date, t.start_date) AS execution_delay '.
+                                 ' FROM '.$this->t['bucket'].' t JOIN '.$this->t['log']. 
+                                 ' ON (t.id=bucket_id) WHERE bucket_id='.$bucketId);
     }
 
 }

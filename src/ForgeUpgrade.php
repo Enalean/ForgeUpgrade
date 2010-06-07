@@ -142,7 +142,7 @@ class ForgeUpgrade {
     protected function displayAlreadyAppliedPerBucket($bucketId) {
         foreach ($this->db->getBucketsLogs($bucketId) as $row) {
                 $level = $row['level'];
-                $message = $row['start_date']."  ".ucfirst($this->db->statusLabel($row['status']))."  ".
+                $message = $row['start_date']."  ".$row['execution_delay']."  ".ucfirst($this->db->statusLabel($row['status']))."  ".
                      $row['script']."  ".$level."  ".$row['message'].PHP_EOL;
                 echo LoggerAppenderConsoleColor::chooseColor($level, $message);
         }
