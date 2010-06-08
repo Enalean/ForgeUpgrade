@@ -146,7 +146,7 @@ class ForgeUpgrade {
         echo '';
         $summary = $this->db->getBucketsSummarizedLogs($bucketId);
         if ($summary) {
-            echo 'start date'."           ".'Execution'."  ".'Status'."  ".'Id'."  ".'Script'.PHP_EOL;
+            echo 'Start date'."           ".'Execution'."  ".'Status'."  ".'Id'."  ".'Script'.PHP_EOL;
             $logs = $summary->fetchAll();
             echo($this->displayColoriedStatus($logs[0]));
         }
