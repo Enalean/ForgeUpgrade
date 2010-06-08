@@ -143,6 +143,7 @@ class ForgeUpgrade {
      * @param Integer $bucketId
      */
     protected function displayAlreadyAppliedPerBucket($bucketId) {
+        echo '';
         $summary = $this->db->getBucketsSummarizedLogs($bucketId);
         if ($summary) {
             echo 'start date'."           ".'Execution'."  ".'Status'."  ".'Id'."  ".'Script'.PHP_EOL;
@@ -150,6 +151,7 @@ class ForgeUpgrade {
             echo($this->displayColoriedStatus($logs[0]));
         }
 
+       echo "Detailed logs execution for bucket ".$bucketId.PHP_EOL;
        $details = $this->db->getBucketsDetailedLogs($bucketId);
        if ($details) {
            echo 'Start date'."           ".'Level'."  ".'Message'.PHP_EOL;
