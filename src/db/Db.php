@@ -63,20 +63,32 @@ class ForgeUpgrade_Db {
             $escapedStatus = array_map(array($this->dbh, 'quote'), $status);
             $stmt   = ' WHERE status IN ('.implode(',', $escapedStatus).')';
         }
-        return $this->dbh->query('SELECT * FROM '.$this->t['bucket'].$stmt.' ORDER BY start_date ASC');
+        return $this->dbh->query('SELECT * , TIMEDIFF(end_date, start_date) AS execution_delay FROM '.$this->t['bucket'].$stmt.' ORDER BY start_date ASC');
     }
 
 
     /**
      * Returns logs for a given bucket's execution
      * 
-     * @param String $bucketPath
+     * @param Integer $bucketId
      */
 
-    public function getBucketsLogs($bucketId) {
-        return $this->dbh->query(' SELECT * , TIMEDIFF(t.end_date, t.start_date) AS execution_delay '.
-                                 ' FROM '.$this->t['bucket'].' t JOIN '.$this->t['log']. 
-                                 ' ON (t.id=bucket_id) WHERE bucket_id='.$bucketId);
+    public function getBucketsSummarizedLogs($bucketId) {
+        return $this->dbh->query(' SELECT * , TIMEDIFF(end_date, start_date) AS execution_delay '.
+                                 ' FROM '.$this->t['bucket'].
+                                 ' WHERE id='.$bucketId);
+    }
+
+    /**
+     * Returns detailed logs for a given bucket's execution
+     * 
+     * @param Integer $bucketId
+     */
+
+    public function getBucketsDetailedLogs($bucketId) {
+         return $this->dbh->query(' SELECT *  '.
+                                  ' FROM  '.$this->t['log']. 
+                                  ' WHERE bucket_id='.$bucketId);
     }
 
 }

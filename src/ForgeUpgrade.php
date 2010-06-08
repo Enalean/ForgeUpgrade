@@ -89,6 +89,9 @@ class ForgeUpgrade {
         if (!isset($options['core']['force'])) {
             $options['core']['force']        = false;
         }
+        if (!isset($options['core']['bucket'])) {
+            $options['core']['bucket']     = null;
+        }
         $this->options = $options;
     }
 
@@ -140,40 +143,54 @@ class ForgeUpgrade {
      * @param Integer $bucketId
      */
     protected function displayAlreadyAppliedPerBucket($bucketId) {
-        foreach ($this->db->getBucketsLogs($bucketId) as $row) {
-                $level = $row['level'];
-                $message = $row['start_date']."  ".$row['execution_delay']."  ".ucfirst($this->db->statusLabel($row['status']))."  ".
-                     $row['script']."  ".$level."  ".$row['message'].PHP_EOL;
-                echo LoggerAppenderConsoleColor::chooseColor($level, $message);
+        $summary = $this->db->getBucketsSummarizedLogs($bucketId);
+        if ($summary) {
+            echo 'start date'."           ".'Execution'."  ".'Status'."  ".'Id'."  ".'Script'.PHP_EOL;
+            $logs = $summary->fetchAll();
+            echo($this->displayColoriedStatus($logs[0]));
         }
+
+       $details = $this->db->getBucketsDetailedLogs($bucketId);
+       if ($details) {
+           echo 'Start date'."           ".'Level'."  ".'Message'.PHP_EOL;
+           foreach ($details->fetchAll() as $row) {
+               $level = $row['level'];
+               $message = $row['timestamp']."  ".$level."  ".$row['message'].PHP_EOL;
+               echo LoggerAppenderConsoleColor::chooseColor($level, $message);
+           }
+       }
     }
 
+
+    protected function displayColoriedStatus($info) {
+        $status = $this->db->statusLabel($info['status']);
+        switch ($status) {
+            case 'failure':
+                $color = LoggerAppenderConsoleColor::RED;
+                break;
+
+           case 'success':
+                $color = LoggerAppenderConsoleColor::GREEN;
+                break;
+
+           case 'skipped':
+                $color = LoggerAppenderConsoleColor::YELLOW;
+                break;
+
+           default:
+                break;
+        }
+        return $color.($info['start_date']."  ".$info['execution_delay']."  ".ucfirst($status)."  ".$info['id']."  ".$info['script'].PHP_EOL.LoggerAppenderConsoleColor::NOCOLOR);
+    }
 
     /**
      * Displays logs of all buckets already applied 
      */
     protected function displayAlreadyAppliedForAllBuckets() {
         $color = '';
+        echo 'start date'."           ".'Execution'."  ".'Status'."  ".'Id'."  ".'Script'.PHP_EOL;
         foreach ($this->db->getAllBuckets() as $row) {
-            $status = $this->db->statusLabel($row['status']);
-            switch ($status) {
-                case 'failure':
-                    $color = LoggerAppenderConsoleColor::RED;
-                    break;
-
-                case 'success':
-                    $color = LoggerAppenderConsoleColor::GREEN;
-                    break;
-
-                case 'skipped':
-                    $color = LoggerAppenderConsoleColor::YELLOW;
-                    break;
-
-                default:
-                    break;
-                }
-            echo $color.($row['start_date']."  ".ucfirst($status)."  ".$row['id']."  ".$row['script'].PHP_EOL.LoggerAppenderConsoleColor::NOCOLOR);
-           
+            echo $this->displayColoriedStatus($row);
         }
     }
 

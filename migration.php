@@ -178,7 +178,7 @@ Options:
   --force                  Execute migration buckets even there are errors  
   --verbose=[level]        How verbose: ALL, DEBUG, INFO, WARN, ERROR, FATAL, OFF
                            Default: INFO
-  --bucket=[bucket id]    Used with already-applied command, to display the detailed 
+  --bucket=[bucket id]     Used with already-applied command, to display the detailed 
                            log for this  bucket                
 
 EOT;
