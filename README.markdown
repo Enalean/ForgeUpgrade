@@ -14,13 +14,13 @@ initialize the database (TODO: use ForgeUpgrade to install itself):
 - set CODENDI_LOCAL_INC to the path toward your codendi local.inc file
 
 then, all your migrations commands will looks like:
-php migration.php --dbdriver=examples/CustomDrivers/ForgeUpgrade_Db_Driver_Codendi.php ...
+php forgeupgrade.php --dbdriver=examples/CustomDrivers/ForgeUpgrade_Db_Driver_Codendi.php ...
 
 Features
 ========
 The command line tool now allows to select where to look for migration scripts:
 <pre>
-$> php migration.php --path=tests/_fixtures/CoreAndPlugins --include="db/updates" check-update
+$> php forgeupgrade.php --path=tests/_fixtures/CoreAndPlugins --include="db/updates" check-update
 </pre>
 
 This will look for migrations in "tests/_fixtures/CoreAndPlugins" subdirectory
@@ -32,7 +32,7 @@ tests/_fixtures/CoreAndPlugins/plugins/foobar/db/updates/...
 Usage example
 =============
 <pre>
-$> php migration.php
+$> php forgeupgrade.php
 Wed Apr 14 18:01:40 2010,781 [30794] INFO ForgeUpgrade - [Pre Up] Run pre up checks
 Wed Apr 14 18:01:40 2010,787 [30794] INFO ForgeUpgrade - [Pre Up] OK : AddTablesForDocmanWatermarking
 Wed Apr 14 18:01:40 2010,789 [30794] INFO ForgeUpgrade - [Pre Up] SKIP: AddDateColumnToItem depends on a migration not already applied

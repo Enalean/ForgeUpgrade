@@ -156,7 +156,7 @@ $upg->run($func);
  */
 function usage() {
     echo <<<EOT
-Usage: migration.php [options] command
+Usage: forgeupgrade.php [options] command
 
 Commands:
 already-applied  List all applied buckets
