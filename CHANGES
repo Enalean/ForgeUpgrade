@@ -1,0 +1,7 @@
+Version 1.0
+(15 June 2010, from master branch)
+
+    First official release
+    Allow to write buckets for database migrations
+    Bucket execution are recorded into the Db.
+    Support of Codendi Db driver only.

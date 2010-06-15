@@ -1,4 +1,5 @@
 <?php
+
 class LoggerAppenderConsoleColor extends LoggerAppenderConsole {
 
     const BLACK   = "\033[30m";
