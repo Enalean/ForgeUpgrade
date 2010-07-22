@@ -19,6 +19,7 @@
  */
 
 class ForgeUpgrade_Db {
+    const STATUS_ERROR   = 0;
     const STATUS_SUCCESS = 1;
     const STATUS_FAILURE = 2;
     const STATUS_SKIP    = 3;
@@ -35,7 +36,8 @@ class ForgeUpgrade_Db {
     }
 
     public static function statusLabel($status) {
-        $labels = array(self::STATUS_SUCCESS => 'success',
+        $labels = array(self::STATUS_ERROR   => 'error',
+                        self::STATUS_SUCCESS => 'success',
                         self::STATUS_FAILURE => 'failure',
                         self::STATUS_SKIP    => 'skipped');
         return $labels[$status];

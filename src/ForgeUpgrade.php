@@ -167,6 +167,7 @@ class ForgeUpgrade {
     protected function displayColoriedStatus($info) {
         $status = $this->db->statusLabel($info['status']);
         switch ($status) {
+            case 'error':
             case 'failure':
                 $color = LoggerAppenderConsoleColor::RED;
                 break;
