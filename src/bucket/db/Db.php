@@ -106,7 +106,8 @@ class ForgeUpgrade_Bucket_Db {
             $res = $this->dbh->exec($sql);
             if ($res === false) {
                 $info = $this->dbh->errorInfo();
-                $this->log->error('An error occured adding table '.$tableName.': '.$info[2].' ('.$info[1].' - '.$info[0].')');
+                $msg  = 'An error occured adding table '.$tableName.': '.$info[2].' ('.$info[1].' - '.$info[0].')';
+                $this->log->error($msg);
                 throw new ForgeUpgrade_Bucket_Db_Exception($msg);
             }
             $this->log->info($tableName.' successfully added');
@@ -132,7 +133,8 @@ class ForgeUpgrade_Bucket_Db {
             $res = $this->dbh->exec($sql);
             if ($res === false) {
                 $info = $this->dbh->errorInfo();
-                $this->log->error('An error occured deleting table '.$tableName.': '.$info[2].' ('.$info[1].' - '.$info[0].')');
+                $msg  = 'An error occured deleting table '.$tableName.': '.$info[2].' ('.$info[1].' - '.$info[0].')';
+                $this->log->error($msg);
                 throw new ForgeUpgrade_Bucket_Db_Exception($msg);
             }
             $this->log->info($tableName.' successfully deleted');
@@ -155,7 +157,8 @@ class ForgeUpgrade_Bucket_Db {
             $res = $this->dbh->exec($sql);
             if ($res === false) {
                 $info = $this->dbh->errorInfo();
-                $this->log->error('An error occured adding index to '.$tableName.': '.$info[2].' ('.$info[1].' - '.$info[0].')');
+                $msg  = 'An error occured adding index to '.$tableName.': '.$info[2].' ('.$info[1].' - '.$info[0].')';
+                $this->log->error($msg);
                 throw new ForgeUpgrade_Bucket_Db_Exception($msg);
             }
             $this->log->info($index.' successfully added index');
@@ -199,7 +202,8 @@ class ForgeUpgrade_Bucket_Db {
             $res = $this->dbh->exec($sql);
             if ($res === false) {
                 $info = $this->dbh->errorInfo();
-                $this->log->error('An error occured while altering '.$tableName.': '.$info[2].' ('.$info[1].' - '.$info[0].')');
+                $msg  = 'An error occured while altering '.$tableName.': '.$info[2].' ('.$info[1].' - '.$info[0].')';
+                $this->log->error($msg);
                 throw new ForgeUpgrade_Bucket_Db_Exception($msg);
             }
             $this->log->info($index.' successfully altered table');
