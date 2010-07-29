@@ -91,6 +91,23 @@ class ForgeUpgrade_Bucket_Db {
             return false;
         }
     }
+    
+    /**
+     * Return true if a primary key already exists on this table
+     *
+     * @param String $tableName      Table name 
+     *
+     * @return Boolean
+     */
+    public function primaryKeyExists($tableName) {
+        $sql = 'SHOW INDEXES FROM '.$this->dbh->quote($tableName).' WHERE Key_name = "PRIMARY"';
+        $res = $this->dbh->query($sql);
+        if ($res && $res->fetch() !== false) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     /**
      * Create new table
@@ -149,6 +166,7 @@ class ForgeUpgrade_Bucket_Db {
      * Alter table to add index and report errors.
      *
      * @param String             $tableName Table name
+     * @param String             $index     The index
      * @param String             $sql       The add index statement
      */
     public function addIndex($tableName, $index, $sql) {
@@ -198,7 +216,7 @@ class ForgeUpgrade_Bucket_Db {
      */
     public function alterTable($tableName, $schema, $property, $sql) {
         $this->log->info('Alter table '.$tableName);
-        if (!$this->propertieExists($tableName, $schema, $property)) {
+        if (!$this->propertyExists($tableName, $schema, $property)) {
             $res = $this->dbh->exec($sql);
             if ($res === false) {
                 $info = $this->dbh->errorInfo();
@@ -206,11 +224,37 @@ class ForgeUpgrade_Bucket_Db {
                 $this->log->error($msg);
                 throw new ForgeUpgrade_Bucket_Db_Exception($msg);
             }
-            $this->log->info($index.' successfully altered table');
+            $this->log->info($tableName.' successfully altered table');
         } else {
-            $this->log->info($index.' already modified');
+            $this->log->info($tableName.' already modified');
         }
     }
+    
+    /**
+     * Add primary key
+     *
+     * Alter table to add primary key and report errors.
+     *
+     * @param String             $tableName      Table name
+     * @param String             $primaryKey     The primary key
+     * @param String             $sql            The add pk statement
+     */
+    public function addPrimaryKey($tableName, $primaryKey, $sql) {
+        $this->log->info('Add primary key '.$tableName);
+        if (!$this->primaryKeyExists($tableName)) {
+            $res = $this->dbh->exec($sql);
+            if ($res === false) {
+                $info = $this->dbh->errorInfo();
+                $msg  = 'An error occured adding primary key to '.$tableName.': '.$info[2].' ('.$info[1].' - '.$info[0].')';
+                $this->log->error($msg);
+                throw new ForgeUpgrade_Bucket_Db_Exception($msg);
+            }
+            $this->log->info($primaryKey.' successfully added pk');
+        } else {
+            $this->log->info($primaryKey.' pk already exists');
+        }
+    }
+    
 
     public function setLoggerParent(Logger $log) {
         $this->log->setParent($log);
