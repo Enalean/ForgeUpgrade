@@ -1,3 +1,12 @@
+Version 1.1
+(29 July 2010, from master branch)
+    == New features ==
+    * Add specific rule to manage primary keys
+
+    == Bug fix ==
+    * Better error handling
+    * Fix typo
+
 Version 1.0
 (15 June 2010, from master branch)
 
