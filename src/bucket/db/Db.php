@@ -100,7 +100,7 @@ class ForgeUpgrade_Bucket_Db {
      * @return Boolean
      */
     public function primaryKeyExists($tableName) {
-        $sql = 'SHOW INDEXES FROM '.$this->dbh->quote($tableName).' WHERE Key_name = "PRIMARY"';
+        $sql = 'SHOW INDEXES FROM '.$tableName.' WHERE Key_name = "PRIMARY"';
         $res = $this->dbh->query($sql);
         if ($res && $res->fetch() !== false) {
             return true;
