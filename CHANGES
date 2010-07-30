@@ -1,3 +1,8 @@
+Version 1.2
+(30 July 2010, from master branch)
+    == Bug fix ==
+    * Fix check of primary key existance
+
 Version 1.1
 (29 July 2010, from master branch)
     == New features ==
