@@ -159,6 +159,32 @@ class ForgeUpgrade_Bucket_Db {
             $this->log->info($tableName.' not exists');
         }
     }
+    
+    /**
+     * Copy table to table
+     *
+     * Duplicate some entries from one table to another.
+     *
+     * @param String             $tableNameSrc Table name of the table from where to copy
+     * @param String             $tableNameDst Table name of the table where to copy
+     * @param String             $sql       The copy statement
+     */
+    public function copyTable($tableNameSrc, $tableNameDst, $sql) {
+        $this->log->info('Copy from table '.$tableNameSrc.' to table '.$tableNameDst);
+        if ($this->tableNameExists($tableNameSrc) && $this->tableNameExists($tableNameDst)) {
+            $res = $this->dbh->exec($sql);
+            if ($res === false) {
+                $info = $this->dbh->errorInfo();
+                $msg  = 'An error occured copying from '.$tableNameSrc.' to '.$tableNameDst.': '.$info[2].' ('.$info[1].' - '.$info[0].')';
+                $this->log->error($msg);
+                throw new ForgeUpgrade_Bucket_Db_Exception($msg);
+            }
+            $this->log->info('Successfully copied from '.$tableNameSrc.' to '.$tableNameDst);
+        } else {
+            $this->log->info($tableNameSrc.' source or '.$tableNameDst.' destination table doest not exist');
+        }
+    }
+    
 
     /**
      * Add index
