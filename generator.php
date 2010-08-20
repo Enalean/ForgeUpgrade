@@ -1,6 +1,6 @@
 <?php
 
-//////  /*foreach($argv as $arg) {
+/*foreach($argv as $arg) {
     
     }*/
 
