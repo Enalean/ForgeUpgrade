@@ -207,16 +207,27 @@ class ForgeUpgrade_Bucket_Db {
     /**
      * Alter table
      *
-     * Alter table to modify field value and report errors.
+     * Modify table and report errors.
      *
      * @param String             $tableName   Table name
-     * @param String             $schema      Schema 
      * @param String             $property    Field
+     * @param String             $operation   The required modification
      * @param String             $sql         The alter table statement
+     * @param String             $schema      Schema
      */
-    public function alterTable($tableName, $schema, $property, $sql) {
+    public function alterTable($tableName, $property, $operation, $sql, $schema ='') {
         $this->log->info('Alter table '.$tableName);
-        if (!$this->propertyExists($tableName, $schema, $property)) {
+        switch ($operation) {
+            case 'drop_column':
+                $condition = $this->columnNameExists($tableName, $property);
+                break;
+            case 'add_property':
+                $condition = !$this->propertyExists($tableName, $schema, $property);
+                break;
+            default:
+                break;
+        }
+        if ($condition) {
             $res = $this->dbh->exec($sql);
             if ($res === false) {
                 $info = $this->dbh->errorInfo();
@@ -229,7 +240,7 @@ class ForgeUpgrade_Bucket_Db {
             $this->log->info($tableName.' already modified');
         }
     }
-    
+
     /**
      * Add primary key
      *
