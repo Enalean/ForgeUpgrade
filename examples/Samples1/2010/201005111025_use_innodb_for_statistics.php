@@ -18,17 +18,17 @@ EOT;
     
     public function up() {
         $sql = ' ALTER TABLE plugin_statistics_user_session TYPE= INNODB';
-        $this->db->alterTable('plugin_statistics_user_session', 'engine = "INNODB"', 'add_property', $sql, 'INFORMATION_SCHEMA.TABLES');
+        $this->db->alterTable('plugin_statistics_user_session', 'INFORMATION_SCHEMA.TABLES', 'engine = "INNODB"', $sql);
 
         $sql = ' ALTER TABLE  plugin_statistics_diskusage_group TYPE= INNODB';
-        $this->db->alterTable('plugin_statistics_diskusage_group', 'engine = "INNODB"', 'add_property', $sql, 'INFORMATION_SCHEMA.TABLES');
+        $this->db->alterTable('plugin_statistics_diskusage_group', 'INFORMATION_SCHEMA.TABLES', 'engine = "INNODB"', $sql);
                 
         $sql = ' ALTER TABLE plugin_statistics_diskusage_user TYPE= INNODB';
-        $this->db->alterTable('plugin_statistics_diskusage_user', 'engine = "INNODB"', 'add_property', $sql, 'INFORMATION_SCHEMA.TABLES');
+        $this->db->alterTable('plugin_statistics_diskusage_user', 'INFORMATION_SCHEMA.TABLES', 'engine = "INNODB"', $sql);
         
 
         $sql = ' ALTER TABLE plugin_statistics_diskusage_site TYPE= INNODB';
-        $this->db->alterTable('plugin_statistics_diskusage_site', 'engine = "INNODB"', 'add_property', $sql, 'INFORMATION_SCHEMA.TABLES');
+        $this->db->alterTable('plugin_statistics_diskusage_site', 'INFORMATION_SCHEMA.TABLES', 'engine = "INNODB"', $sql);
        
      }
     

@@ -210,24 +210,14 @@ class ForgeUpgrade_Bucket_Db {
      * Modify table and report errors.
      *
      * @param String             $tableName   Table name
-     * @param String             $property    Field
-     * @param String             $operation   The required modification
-     * @param String             $sql         The alter table statement
      * @param String             $schema      Schema
+     * @param String             $property    Field
+     * @param String             $sql         The alter table statement
+
      */
-    public function alterTable($tableName, $property, $operation, $sql, $schema ='') {
+    public function alterTable($tableName, $schema, $property, $sql) {
         $this->log->info('Alter table '.$tableName);
-        switch ($operation) {
-            case 'drop_column':
-                $condition = $this->columnNameExists($tableName, $property);
-                break;
-            case 'add_property':
-                $condition = !$this->propertyExists($tableName, $schema, $property);
-                break;
-            default:
-                break;
-        }
-        if ($condition) {
+        if (!$this->propertyExists($tableName, $schema, $property)) {
             $res = $this->dbh->exec($sql);
             if ($res === false) {
                 $info = $this->dbh->errorInfo();
