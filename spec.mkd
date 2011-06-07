@@ -1,0 +1,523 @@
+Note: copy from phpwiki, not completely formated yet
+
+Document overview
+=================
+
+This document aims to collect requirements about the automation of Codendi updates / upgrades as well as specification of what should be done to cover those requirements.
+
+Change Log
+----------
+
+Version 2:
+  Precise what was intended by the automation with tools (puppet & co).
+Version 1:
+  Initial version
+
+Terms & definitions
+-------------------
+
+Codendi admin:
+  People who administrate the platform (access to site admin part, configure the platform, tune it for end users, etc). They are "application administrators" and have little or no knowledge on how to configure an SMTP server and so on.
+Operations:
+  People who run the platform: system administration (OS, mail, connexion with network, monitoring) as well as install the Codendi platform (install or upgrade "Codendi package"). They are "system administrators" and have little or no knowledge of Codendi.
+Developers:
+  People who develop Codendi.
+End users:
+  People that uses Codendi.
+~OpAdminUser:
+  In small/medium organization, without a full blown dedicated "Operations/Codendi admin/..." teams, there is one guy/chick nominated to play all those roles. It's often not it's primary job, she might be very late to apply upgrades.
+
+Stories
+-------
+
+As an Operation people, I want to install Codendi easily with a documented, reliable and consistent way. I have little understanding of what Codendi is so I cannot tune the install by myself without fear of breaking something. However I'm asked to install customized versions of this tool (without DNS delegation, without CVS, etc). I like standard packages, documented and automated processes. I'm at the state of the art of the sysadmin techno and I want to deliver packages with [Capistrano|http://www.capify.org/index.php/Capistrano], [Puppet|http://www.puppetlabs.com/] or [Chef|http://wiki.opscode.com/display/chef/Home].
+
+As a Codendi admin, I want to deliver to end users the platform they need. In my context I might be asked not to deliver the "full codendi install" because it's against some corporate policies and/or there is already a tool within the company that provides the feature (Instant messaging, mailing lists, etc). I'm afraid by releases because they can break stuff and as people strongly rely on the platform in their day to day work, I cannot afford breakages.
+
+As a developer, I want an easy way to provide my new features. I don't want to be limited in what I can propose but I don't want to have an heavy process to deliver my work. I also want to easy as much as possible the upgrade path for customers so they can push in prod my work ASAP but I don't like to spend time to support teams during upgrade process, it should just work. I also want to ease as much as possible the whole stack deployment for ~OpAdminUser.
+
+As a end user, I want new features but I don't want the site to be down. I want to be warned about unavoidable downtime but I don't want to be spamed, moreover I want those downtime to be the less frequent as possible and outside my work time. I need to trust the platform because it contains all my precious data that the heart of my company's future products.
+
+Each of them, just want something that get the job done seamlessly.
+
+In order to satisfy all the players, we must propose a system:
+- automated: to move from any given version to any other given version (in the future), in a non interactive way.
+- safe & secure: operations must be revertable or the system should check it is able to complete the upgrade or at the very least fail gracefully and give all the meaningful info to debug what went wrong (and consider manually mark this as stable).
+- easy to use: One command to run them all.
+- easy to develop & validate: developer should provide what is needed to ensure his work won't break the live platform
+- logged: we should keep a trace of all updates and ultimately restore the configurations updates (for instance, restore an old platform with an backup of data, or find what changed in the configuration that could explain this new behaviour, etc).
+
+About automation and tooling
+============================
+
+For the sake of simplicity, we will not address specific usage of deployment tools (Puppet & co) because we don't have enough of working knowledges on them and their usage are too theoretical yet (at least in spec author's mind).
+
+So, migrations won't be stoppable (debrayable in french) on for the configuration update part. If an upgrade script needs to modify a crontab, it will do it, even if the admin as a way to deploy new crontab in an automated way. In this case, the admin will only let the upgrade process do its job (modify the crontab) and re-deliver a new crontab with his favorite tool right after the forge upgrade.
+
+However, if the upgrade framework could help the admin to detect which files are impacted and in which way (to prepare the post-upgrade) it would be nice.
+
+Background
+----------
+
+The upgrade process is probably the most sensitive part of the application for various reasons:
+- The yearly releases comes with a very large number of changes, all in the same time, the most changes in the same time, the more risks to have an error.
+- Deep integration with underlying system. Codendi needs some "system" services to be configured in a given way in order to work, this may be in conflict with organization standards.
+- Codendi comes as a full package with everything installed and you must be a Codendi dev & admin to make a custom install.
+
+Filesystem consistency
+----------------------
+
+The upgrade process may lead to a broken system state, thus a revert process must be provided at a low level. LVM temporary snapshots (Logical Volume Management) should be used in order to be able to restore the pre upgrade state.
+Several directories are critical for any codendi platform:
+- database directory
+- data directory
+- codendi source directory
+- configuration directory
+- unix software resource directory
+
+All these must be mounted as several Logical Volumes.
+
+Specification
+=============
+
+An executable spec is available on [github|http://github.com/vaceletm/ForgeUpgrade]
+
+The main idea of the following proposal is to leverage on existing ~ServerUpdate db upgrade feature but to make it as a Codendi Core element.
+
+Before going further, all what I propose is greatly inspired from:
+- existing Codendi ~ServerUpdate
+- ~FusionForge db upgrade model: startpoint & transaction
+- [Rails migrations|http://guides.rubyonrails.org/migrations.html]: ruby scripts, naming conventions.
+- [Doctrine migrations|http://www.doctrine-project.org/documentation/manual/1_2/en/migrations]: mostly the same thing than Rails anyway.
+
+But with some major differences:
+- from Codendi: serverupdate is not easy enough for developers and tooling to poor (no automation in command line, etc).
+- from ~FusionForge: I don't think plain .sql upgrade files are good (difficult to use in php, not flexible enough).
+- from Rails & Doctrine: we don't have time/interest to develop some kind of ORM to wrap all possible data modifications.
+
+I will detail the proposal in the following sections.
+
+Leverage on existing upgrade service
+------------------------------------
+
+First of all, the current ~ServerUpdate database migration is good start point:
+- it works
+- it's easy enough for developer
+- but... it's not used.
+
+As a reminder, what propose this plugin is to wrap the DB migration scripts into a PHP class:
+
+<verbatim>
+    class Update_001 extends CodendiUpgrade {
+        function _process() {
+            echo $this->getLineSeparator();
+            echo "Execution of script : ".get_class($this);
+            echo $this->getLineSeparator();
+            $sql = "ALTER TABLE ...";
+            if (!$this->update($sql)) {
+                //$this->addUpgradeError("Erreur systeme");
+            }
+            echo $this->getLineSeparator();
+        }
+    }
+</verbatim>
+
+The good thing with PHP script (over plain .sql files) is that you can embed complex manipulations into the processing phase.
+But you can also do things that are not DB upgrade at all. For instance, you can modify a cron job, apache configuration or whatever.
+
+Actually, any migration_from_X.Y_to_Z.A.sh script could be written in a consistent way as a php script.
+
+So the main proposal is to write ALL upgrades (both minor & major) as "~ServerUpdate" scripts.
+
+Current limitations
+-------------------
+
+But ~ServerUpdate tools are poor:
+- It's impossible to list the scripts not already applied on a give platform (except in web interface).
+- You cannot re-run a script that failed
+- There is no support of plugin updates
+
+And the core itself as some flaws:
+- It relies on Codendi API (~DataAccessObject) to perform the DB queries. This is very dangerous as this API might evolve and we have to be sure that the upgrade script can run with any future version of the API. If we migrate a 3.4 server to 4.2, the upgrade script written for 3.4, 3.6 & 4.0 will be run with 4.2 version of the API.
+- Web interface update is designed to rely on Subversion and it's commit messages.
+- Web interface update the code while the application is running and that may lead to inconsistencies.
+- It's missing of some basic helpers for common operations (add index, add column, etc).
+
+Proposal
+--------
+
+! Files organization
+
+Rails make it easy to avoid clashes: it uses dates to time stamp the scripts (<code>YYYYMMDDHHMMSS</code>. It happens the undesrcore separated version of class name to this timestamp.
+
+For instance, for a ~CreateProducts class you would have
+<verbatim>
+    $> head db/migrate/20100331105022_create_products.rb
+    class CreateProducts < ActiveRecord::Migration
+        ...
+</verbatim>
+
+We can use the same organization, in <code>src/updates</code> for Core and in <code>plugins/<name>/updates</code> for plugins (or <code>plugins/<name>/updates/codendi</code> for ~FusionForge/Codendi plugins ?).
+We might want to split the file structure with a directory per year so the file structure would be more readable: <code>src/updates/YYYY/YYYYMMDDHHMMSS_class_name.php</code>.
+
+In order to ease the script generation, we have a tool that generate the file with the right name in the right place and the right class template
+<verbatim>
+    $> codendi_tools/migrations CreateProduct
+    -> create src/updates/2010/20100331105022_create_products.php
+    -> the file contains the template of ~CreateProducts class.
+
+    $> codendi_tools/migrations --plugin=ldap CreateProduct
+    ...
+</verbatim>
+
+! Core independence
+
+The DB API should be independent of the Core (to be defined).
+
+Note: the usage of any other API (docman, Backend, whatever) should be prohibited for the very same reasons.
+
+! Writing a migration: Base
+
+A migration could be whatever you want. Most of the time, it would be plain SQL.
+
+If the migration requires some specials access rights (for instance a migration that would affect root crontab) it should indicate it with a special method. For instance
+<verbatim>
+    class UpdateRootCrontab extends CodendiUpgrade {
+        function requires() {
+            return array(self::SYSTEM_ROOT);
+        }
+    }
+</verbatim>
+
+In this case, the upgrade could not be applied through the web interface but only with the system access, by root user.
+
+! Writing a migration: Helpers
+
+A good practice would be to make the scripts runnable several time (it might not be always possible through) to avoid manipulation errors. It's pretty easy for all data structure modifications.
+Before adding a new column into a table, one should check this column is not already added.
+
+The migration API should propose a set of method to help to detect it (it's already partially implemented). By extends, if the API propose methods for common operations (add a column, add an index, etc) it would be easier to automate the check.
+
+This is more important with index because a DBA might add an index on a very used table as an emergency fix and an upgrade script that add the very same index "from the upstream" should not fail.
+
+! Customization
+
+We could introduce a notion of "available component" for non plugin Core services (of features) that might or might not be available. This includes:
+- DNS delegation
+- FTP / Anonymous FTP
+- Mailing lists
+- CVS
+- ...
+
+We can have two approaches:
+- If we consider "on big upgrade script to run them all" (a transposition of current migration_*.sh scripts into PHP), developers should use an API to apply an update only if the service is
+installed on the site. For instance:
+
+<verbatim>
+    ... hundred of lines...
+    if ($this->site->usesCVS()) {
+        // modify xinetd
+    }
+    ... hundred of lines...
+</verbatim>
+
+- If we consider "on script per topic", there would be one script for CVS migrations and the upgrade class would declare "I'm touching CVS". The upgrade scheduler would execute the script only if CVS is installed. For instance:
+
+<verbatim>
+    class UpdateCvsXinetdScript extends CodendiUpgrade {
+        function appliesOn() {
+            return Site::CVS;
+        }
+
+        function _process() {
+            // modify xinetd
+        }
+    }
+</verbatim>
+
+
+! Upgrade API proposal
+
+Each plugin provides a list of version specific upgrade classes. There should be one central database table which contains a log of the applied upgrades for each plugin.
+
+Interface ForgeUpgradeBucket:
+
+- description(): Return a string with the description of the upgrade
+- dependsOn(): Allow to define a dependency list
+- preUp(): Ensure the package is OK before running Up method
+- up(): Perform the upgrade
+- postUp(): Ensure the package is OK after running Up method
+- setDryRun($mode): Specifies if the upgrade should really be done or only a test run
+
+The forge provides a central upgrade manager which loads all upgrade plugins and sorts them before execution. It is important that the upgrade classes must not be changed by future versions. Only new classes may be created.
+
+Scenario / FAQ
+==============
+
+About execution order
+---------------------
+
+With timestamp based approach, the scripts are "naturally" ordered as, for a given development, scripts will come one after another to update the platform in a consistent way.
+
+Let says you have 2 concurrent developers: Alice & Bob.
+* Alice works on Document manager plugin to had a new connector to yet another document system.
+  She needs 2 new tables and to modify a table in the core of the application.
+  At this point she has 2 migrations scripts:
+  * <code>plugins/docman/updates/201004010000_add_alfresco_references_tables.php</code>
+  * <code>src/updates/201004030000_add_detail_column_to_service.php</code>
+
+If you checkout Alice branch and run the migrations, <code>add_alfresco_references_tables</code> will always be executed before <code>add_detail_column_to_service</code>
+
+* Bob works on the Core, in order to improve the Group management.
+  The work is quite big and he already wrote 4 migration scripts:
+  * <code>src/updates/201003050000_rename_groups_by_roles.php</code>
+  * <code>src/updates/201003200000_add_new_union_roles.php</code>
+  * <code>src/updates/201004020000_remove_legcay_tables.php</code>
+  * <code>src/updates/201004070000_add_stuff.php</code>
+
+As for Alice, scripts will always be executed in this order. A question arise: "Why 4 scripts instead of 1 ?". Answer: because scripts are written upon needs. If Bob thinked to all these modifications at the beginning of the dev, one script might have been enough. But functionnaly, there is no difference between 1 script and 4 in our case.
+
+Now, let see what happens if we merge stuff together.
+
+Bob is working on trunk and Alice on a feature branch. So Bob merge Alice work in trunk.
+At this time, the following script exists in trunk:
+* _Bob_ <code>src/updates/201003050000_rename_groups_by_roles.php</code>
+* _Bob_ <code>src/updates/201003200000_add_new_union_roles.php</code>
+* _Bob_ <code>src/updates/201004020000_remove_legcay_tables.php</code>
+* _Alice_ <code>src/updates/201004030000_add_detail_column_to_service.php</code>
+* _Bob_ <code>src/updates/201004070000_add_stuff.php</code>
+* _Alice_ <code>plugins/docman/updates/201004010000_add_alfresco_references_tables.php</code>
+
+Once merged, Bob runs the migrations <code>./migrations --update</code> and following scripts are applied:
+# _Alice_ <code>plugins/docman/updates/201004010000_add_alfresco_references_tables.php</code>
+# _Alice_ <code>src/updates/201004030000_add_detail_column_to_service.php</code>
+
+Only Alice's scripts are applied as Bob is working on it's own instance where his scripts are already applied.
+
+Now, René comes back from his 2 months road trip in the Cantal and updates his own copy of the trunk. He runs <code>./migrations --update</code> that applies:
+# _Bob_ <code>src/updates/201003050000_rename_groups_by_roles.php</code>
+# _Bob_ <code>src/updates/201003200000_add_new_union_roles.php</code>
+# _Alice_ <code>plugins/docman/updates/201004010000_add_alfresco_references_tables.php</code>
+# _Bob_ <code>src/updates/201004020000_remove_legcay_tables.php</code>
+# _Alice_ <code>src/updates/201004030000_add_detail_column_to_service.php</code>
+# _Bob_ <code>src/updates/201004070000_add_stuff.php</code>
+
+Neither René or Bob applied the migrations in the same order but fortunatly the ends up with the very same database and they are guaranteed that Alice modifications was applied in the right order, even if, for René, one of Bob's scripts was applied in between 2 Alice's scripts.
+
+About branches, contrib and merges
+----------------------------------
+
+"Previously on Lost^Wthis spec": Bob enhanced the trunk, Alice developed a new feature, René was in vacation and saw polar bears on a tropical island in French Cantal department.
+
+Alice initially developed her feature for a customer (Vishal) that needs it in the current stable branch (4.0). He his perfectly aware that the feature is not fully tested but is willing to deploy it in production anyway so Alice created a dedicated 4.0.x branch for him (4.0.x-vishal) where she merge her development.
+
+Vishal gets packages from this new branch, install them and run <code>./migrations --update</code>. This applies:
+# _Alice_ <code>plugins/docman/updates/201004010000_add_alfresco_references_tables.php</code>
+# _Alice_ <code>src/updates/201004030000_add_detail_column_to_service.php</code>
+
+It's all fun an games but Vishal reports to Alice that his current development is lacking of some important features on permissions management.
+Alice needs to modify her code and add a new migration:
+* _Alice_ <code>plugins/docman/updates/201004200000_add_alfresco_permissions.php</code>
+
+She merges her code & migration in 4.0.x-vishal branch, deliver it and when vishal install the new version, only the latest script is applied:
+# _Alice_ <code>plugins/docman/updates/201004200000_add_alfresco_permissions.php</code>
+
+In the same time, in trunk, after merge of Alice work, René started to better integrate Alice and Bob developments. This required to make some database modifications in docman plugin:
+* _René_ <code>plugins/docman/updates/201004150000_alfresco_uses_new_roles.php</code>
+
+Both René and Bob applies it <code>./migrations --update</code>:
+# _René_ <code>plugins/docman/updates/201004150000_alfresco_uses_new_roles.php</code>
+
+This development is not delivered to vishal because it depends of stuff on trunk, Alice still work on her own branch so she doesn't have access to this migration too.
+
+Alice work on Alfresco is now done so she requests for a final merge in trunk. The result is:
+* _Bob_ <code>src/updates/201003050000_rename_groups_by_roles.php</code>
+* _Bob_ <code>src/updates/201003200000_add_new_union_roles.php</code>
+* _Bob_ <code>src/updates/201004020000_remove_legcay_tables.php</code>
+* _Alice_ <code>src/updates/201004030000_add_detail_column_to_service.php</code>
+* _Bob_ <code>src/updates/201004070000_add_stuff.php</code>
+* _Alice_ <code>plugins/docman/updates/201004010000_add_alfresco_references_tables.php</code>
+* _René_ <code>plugins/docman/updates/201004150000_alfresco_uses_new_roles.php</code>
+* _Alice_ <code>plugins/docman/updates/201004200000_add_alfresco_permissions.php</code>
+
+After the merge, both René and Bob applies the latest migrations, <code>./migrations --update</code>:
+# _Alice_ <code>plugins/docman/updates/201004200000_add_alfresco_permissions.php</code>
+
+Alice switch now on the trunk, she applies all here missing migrations, <code>./migrations --update</code>:
+# _Bob_ <code>src/updates/201003050000_rename_groups_by_roles.php</code>
+# _Bob_ <code>src/updates/201003200000_add_new_union_roles.php</code>
+# _Bob_ <code>src/updates/201004020000_remove_legcay_tables.php</code>
+# _Bob_ <code>src/updates/201004070000_add_stuff.php</code>
+# _René_ <code>plugins/docman/updates/201004150000_alfresco_uses_new_roles.php</code>
+
+End of the story, final delivery to customer. The 5.0.x branch is out and all customers are encouraged to use it, there is no longer <code>-vishal</code> branch as alfresco development is embedded into vanilla 5.0.x.
+
+For Karim, user of 4.0.x vanilla who upgrades to 5.0.x vanilla, upgrade path is:
+# _Bob_ <code>src/updates/201003050000_rename_groups_by_roles.php</code>
+# _Bob_ <code>src/updates/201003200000_add_new_union_roles.php</code>
+# _Alice_ <code>plugins/docman/updates/201004010000_add_alfresco_references_tables.php</code>
+# _Bob_ <code>src/updates/201004020000_remove_legcay_tables.php</code>
+# _Alice_ <code>src/updates/201004030000_add_detail_column_to_service.php</code>
+# _Bob_ <code>src/updates/201004070000_add_stuff.php</code>
+# _René_ <code>plugins/docman/updates/201004150000_alfresco_uses_new_roles.php</code>
+# _Alice_ <code>plugins/docman/updates/201004200000_add_alfresco_permissions.php</code>
+
+For Vishal, the upgrade path is:
+# _Bob_ <code>src/updates/201003050000_rename_groups_by_roles.php</code>
+# _Bob_ <code>src/updates/201003200000_add_new_union_roles.php</code>
+# _Bob_ <code>src/updates/201004020000_remove_legcay_tables.php</code>
+# _Bob_ <code>src/updates/201004070000_add_stuff.php</code>
+# _René_ <code>plugins/docman/updates/201004150000_alfresco_uses_new_roles.php</code>
+
+And voilà!
+
+! Incompatibles changes
+
+But what happens if latest René and Alice developments are incompatibles ?
+For instance if Alice's <code>plugins/docman/updates/201004200000_add_alfresco_permissions.php</code> rely on existing Group management that was modified by Bob and adapted by René.
+
+If <code>add_alfresco_permissions</code> result is safe and just need to be adapted, just write another migration script in trunk that clean things up.
+Otherwise (if the script rely on tables that no longer exists), <code>add_alfresco_permissions.php</code> must be removed from trunk and a new script should be added to do the things the right way.
+
+But what would that mean for vishal ? Vishal had already run Alice's version of <code>add_alfresco_permissions</code> so:
+- He should not run new <code>add_alfresco_permissions</code> version
+and
+- He should run a dedicated script that will update his instance to meet Vanilla requirement.
+
+There is 2 possibilities:
+- If new <code>add_alfresco_permissions</code> can handle both normal and vishal's situation, this is the best because there is nothing to do, Vishal will execute the new script as the others without errors.
+- If it's not possible, there is a need for a new dedicated 5.0.x branch for Vishal without new <code>add_alfresco_permissions</code> and with a migration script that upgrades 4.0.x-vishal to 5.0.x-vanilla.
+
+
+Miscellaneous
+=============
+
+Various ideas not formalized yet.
+
+* Upgrade should gather all the environment informations it needs before running, either
+** by asking them to admin (interactive)
+** by taking some variables in a file (or command line or whatever)
+** An upgrade script should have a way to ask for this info to Operator.
+
+* Upgrade of the whole platform should be fully automated (deploy of new code, upgrade of data, deploy of new conf).
+** Be careful with deployment of new conf and potential conflict during upgrade (should the new conf be deployed before running the upgrade ?)
+
+* In order to prepare an upgrade, it should be possible to run a special tool that would generate the new conf offline. This new conf can be versionned and deployed automaticaly
+
+* <code>down</code> might be useful in some cases.
+
+ForgeUpgrade for Codendi
+========================
+
+http://github.com/vaceletm/ForgeUpgrade
+
+The purpose of this section is to describe what ForgeUpgrade could bring to Codendi.
+
+What is ForgeUpgrade
+--------------------
+
+ForgeUpgrade is a tool prototyped from this specification and that tries to provide a concrete approach of most concepts described here.
+
+ForgeUpgrade is a general purpose upgrade automation framework strongly inspired from RubyOnRails migration framework.
+
+It's *not*:
+* a database abstraction framework (but you could use one for DB migrations)
+* a packaging system (no aims to deliver sources, binaries or whatever)
+
+It aims to address following stories:
+* As a developer, I need to update my application live data (files or DB) to synchronize it with my Code.
+* As an application installer, I want to apply all the transformations needed on my live data so they are synchronized with the codex I just installed.
+* As an application integrator, I want to be able deliver customized versions of my application and to provide a smooth upgrade from one version to another.
+
+It can be seen as a <acronym title="Source configuration management, svn/git/whatever">SCM</acronym> for "live data".
+
+! Regarding this spec
+
+ForgeUpgrade doesn't aims to functionnaly covers everything that is described in this specification, especially:
+* automation of the delivery
+* FS snapshoting
+
+How it works
+------------
+
+There are 2 sides:
+* The migration story (aka a bucket). For instance "Add a new column in a DB table", "Replace a pattern in all .wiki files", etc
+** A bucket should be self-sufficient and all operations within a bucket must correlated. In other terms, you could do "cherry-picking" with buckets but one bucket should be atomic (as a revision in Subversion).
+** The migration stories are provided by the application to upgrade
+* The tool that knows what to do with the buckets (which one are already applied, list the pending tasks, display what happened, etc)
+** The tool is independent of the application to upgrade. You can have one central ForgeUpgrade install that is able to upgrade several application. However, the migration buckets are not centralized, each application should provide it's own set.
+
+! Buckets
+
+A bucket is a php file that contains a php class that match the file name (<code>201004091318_add_date_column_to_item.php</code> contains <code>b201004091318_add_date_column_to_item</code> class).
+
+A bucket as a
+* <code>description</code>: that explain the purpose of the transformations
+* <code>up</code>: the method that perform the changes
+* <code>preUp</code>: an optional method to check stuff before having run the upgrade
+* <code>postUp</code>: an optional method to check stuff after having run the upgrade
+
+Buckets are organized after a time line, the bucket name contains the date (Year Month Day Hour Day) so each buckets are executed in the same order they are created (so consistency is ensured as well as unicity of the name). There is no dependency management per see, dependencies are managed through the time line.
+
+! Automation tool
+
+The automation tool browse a file hierarchy for files that match the bucket pattern. For each bucket not already applied, it:
+- run all 'preUp' methods (so it check if all the upcomming transformations are likely to work)
+- if everything is correct, it applies each bucket one after another following the time line.
+- all bucket steps are recorded into a database so it's easy to come back later and see what happened during a given upgrade
+- if a bucket fail, the process is stopped (and the corresponding entry in the database is flagged as an error)
+
+How Codendi could use it
+------------------------
+
+There is a strong debate on discussions@planetforge.org list to find the exact scope of a Bucket:
+* Should a bucket be limited to database upgrades ?
+* Should it be used for data upgrades as well ?
+* Should it covers system parts or configuration ?
+
+Other systems
+=============
+
+Rails
+-----
+
+Well described in doc http://guides.rubyonrails.org/migrations.html
+
+Drupal
+------
+
+More or less the same approach but with function instead of OO approach plus a dependency mecanism.
+For instance, for one module:
+http://drupalcode.org/viewvc/drupal/drupal/modules/taxonomy/taxonomy.install?revision=1.40&view=markup
+
+It relies on an internal ORM for upgrades.
+
+Module system seems well prepared for upgrades but Core does't seems to use the same approach.
+
+http://drupal.org/upgrade/
+
+The Core major ugpgrades requires to move to the "latest minor" before continuing:
+>    1. If upgrading from one minor release to another, such as 6.3 to 6.14, jump straight to the latest release within that major version.
+>    2. If upgrading from one major version to another, such as from 4.6 to 6.15, you must upgrade to the latest release within the major version (4.7), then the latest release within the next major version (5.21), etc. until you're at the latest release of the final major version
+http://drupal.org/upgrade/tutorial-introduction
+
+Generic PHP installer
+---------------------
+
+* People of Arbit wants to develop a new web installer:
+** http://kore-nordmann.de/blog/0097_php_web_installer.html
+** http://cweiske.de/tagebuch/Generic%20PHP%20application%20installers.htm
+** http://tracker.arbitracker.org/arbit/development_wiki/view/Installer
+
+Moodle
+------
+
+Moodle developed it's own upgrade system based on a db schema abstraction in XML:
+http://docs.moodle.org/en/Development:XMLDB_defining_an_XML_structure
+
+You define your DB schema in XML thanks to a [dedicated editor|http://docs.moodle.org/en/XMLDB_editor] and for schema change, the editor is able to generate the PHP code to do this upgrade.
+
+The upgrades are managed by hand in a single <code>upgrade.php</code> file:
+http://docs.moodle.org/en/Development:Installing_and_upgrading_plugin_database_tables
+
+Upgrade can only be linear
