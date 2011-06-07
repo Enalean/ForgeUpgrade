@@ -1,5 +1,5 @@
 ifeq ($(strip $(RPM_TMP)),)
-	RPM_TMP=~/rpmbuild
+	RPM_TMP=$(HOME)/rpmbuild
 endif
 
 BASE_DIR=$(shell pwd)
