@@ -83,7 +83,7 @@ class ForgeUpgrade_Bucket_Db {
      * @return Boolean
      */
     public function indexNameExists($tableName, $index) {
-        $sql = 'SHOW INDEX FROM '.$this->dbh->quote($tableName).' WHERE Key_name LIKE '.$this->dbh->quote($index);
+        $sql = 'SHOW INDEX FROM '.$tableName.' WHERE Key_name LIKE '.$this->dbh->quote($index);
         $res = $this->dbh->query($sql);
         if ($res && $res->fetch() !== false) {
             return true;
