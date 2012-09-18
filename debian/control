@@ -1,0 +1,16 @@
+Source: forgeupgrade
+Section: php
+Priority: optional
+Maintainer: Raphaël Hertzog <hertzog@debian.org>
+Build-Depends: debhelper (>= 9)
+Standards-Version: 3.9.3
+Homepage: https://github.com/vaceletm/ForgeUpgrade
+Vcs-Git: git://github.com/vaceletm/ForgeUpgrade.git
+Vcs-Browser: https://github.com/vaceletm/ForgeUpgrade
+
+Package: forgeupgrade
+Architecture: all
+Depends: ${misc:Depends}, php | php-cli
+Description: Helper to upgrade application data
+ ForgeUpgrade is an application data (files or databases) upgrade automation
+ tool. It is very close to Ruby on Rails 'migration' system.
