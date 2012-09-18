@@ -1,0 +1,10 @@
+forgeupgrade.php usr/share/forgeupgrade/
+generator.php usr/share/forgeupgrade/
+src usr/share/forgeupgrade/
+lib usr/share/forgeupgrade/
+db usr/share/forgeupgrade/
+
+# Should be delivered from Codendi itself
+examples/CustomDrivers/ForgeUpgrade_Db_Driver_Codendi.php usr/share/forgeupgrade/dbdriver/
+
+forgeupgrade usr/lib/forgeupgrade/bin/
