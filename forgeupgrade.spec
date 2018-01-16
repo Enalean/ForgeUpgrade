@@ -4,11 +4,11 @@
 Summary: ForgeUpgrade helps developer to upgrades their application data
 Name: forgeupgrade
 Version: @@VERSION@@
-Release: 2%{?dist}
+Release: 1%{?dist}
 BuildArch: noarch
-License: LGPG
+License: LGPL
 Group: Development/Tools
-URL: http://github.com/vaceletm/ForgeUpgrade
+URL: https://github.com/Enalean/ForgeUpgrade
 Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 Requires: rh-php56-php-cli, rh-php56-php-pdo
@@ -57,6 +57,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Tue Jan 16 2018 Thomas Gerbet <thomas.gerbet@enalean.com> - 1.3-1
+- Run with rh-php56
+
 * Tue Jun 07 2011 Manuel VACELET <manuel.vacelet@enalean.com> - 1.2-2
 - Change lib dir (force to /usr/lib to avoid 64 bits incompat)
 
