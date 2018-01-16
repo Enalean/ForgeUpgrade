@@ -11,6 +11,7 @@ Group: Development/Tools
 URL: http://github.com/vaceletm/ForgeUpgrade
 Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
+Requires: rh-php56-php-cli, rh-php56-php-pdo
 
 %description
 ForgeUpgrade is an application data (files or databases) upgrade automation
