@@ -47,7 +47,7 @@ class ForgeUpgrade_Bucket_Db {
      * @return Boolean
      */
     public function tableNameExists($tableName) {
-        $sql = 'SHOW TABLES LIKE '.$this->dbh->quote($tableName);
+        $sql = "SHOW TABLES LIKE `$tableName`";
         $res = $this->dbh->query($sql);
         if ($res && $res->fetch() !== false) {
             return true;
@@ -65,7 +65,7 @@ class ForgeUpgrade_Bucket_Db {
      * @return Boolean
      */
     public function columnNameExists($tableName, $columnName) {
-        $sql = 'SHOW COLUMNS FROM `'.$tableName.'` LIKE '.$this->dbh->quote($columnName);
+        $sql = "SHOW COLUMNS FROM `$tableName` LIKE ". $this->dbh->quote($columnName);;
         $res = $this->dbh->query($sql);
         if ($res && $res->fetch() !== false) {
             return true;
@@ -77,13 +77,13 @@ class ForgeUpgrade_Bucket_Db {
     /**
      * Return true if the given index name on the table already exists into the database
      *
-     * @param String $tableName Table name 
+     * @param String $tableName Table name
      * @param String $index     Index
      *
      * @return Boolean
      */
     public function indexNameExists($tableName, $index) {
-        $sql = 'SHOW INDEX FROM '.$this->dbh->quote($tableName).' WHERE Key_name LIKE '.$this->dbh->quote($index);
+        $sql = "SHOW INDEX FROM `$tableName` WHERE Key_name LIKE " . $this->dbh->quote($index);
         $res = $this->dbh->query($sql);
         if ($res && $res->fetch() !== false) {
             return true;
@@ -91,16 +91,16 @@ class ForgeUpgrade_Bucket_Db {
             return false;
         }
     }
-    
+
     /**
      * Return true if a primary key already exists on this table
      *
-     * @param String $tableName      Table name 
+     * @param String $tableName      Table name
      *
      * @return Boolean
      */
     public function primaryKeyExists($tableName) {
-        $sql = 'SHOW INDEXES FROM '.$tableName.' WHERE Key_name = "PRIMARY"';
+        $sql = "SHOW INDEXES FROM `$tableName` WHERE Key_name = 'PRIMARY'";
         $res = $this->dbh->query($sql);
         if ($res && $res->fetch() !== false) {
             return true;
@@ -132,7 +132,7 @@ class ForgeUpgrade_Bucket_Db {
             $this->log->info($tableName.' already exists');
         }
     }
-    
+
     /**
      * Delete table
      *
@@ -189,13 +189,13 @@ class ForgeUpgrade_Bucket_Db {
      * Return true if given table has a given propertie
      *
      * @param String $tableName   Table name
-     * @param String $schema      Schema 
+     * @param String $schema      Schema
      * @param String $property    Field
      *
      * @return Boolean
      */
     public function propertyExists($tableName, $schema, $property) {
-        $sql = 'SELECT table_name FROM '.$this->dbh->quote($schema).' WHERE '.$property.' AND table_name LIKE '.$this->dbh->quote($tableName);
+        $sql = 'SELECT table_name FROM '.$schema.' WHERE '.$property.' AND table_name LIKE '.$this->dbh->quote($tableName);
         $res = $this->dbh->query($sql);
         if ($res && $res->fetch() !== false) {
             return true;
@@ -210,7 +210,7 @@ class ForgeUpgrade_Bucket_Db {
      * Alter table to modify field value and report errors.
      *
      * @param String             $tableName   Table name
-     * @param String             $schema      Schema 
+     * @param String             $schema      Schema
      * @param String             $property    Field
      * @param String             $sql         The alter table statement
      */
@@ -229,7 +229,7 @@ class ForgeUpgrade_Bucket_Db {
             $this->log->info($tableName.' already modified');
         }
     }
-    
+
     /**
      * Add primary key
      *
@@ -254,7 +254,7 @@ class ForgeUpgrade_Bucket_Db {
             $this->log->info($primaryKey.' pk already exists');
         }
     }
-    
+
 
     public function setLoggerParent(Logger $log) {
         $this->log->setParent($log);
