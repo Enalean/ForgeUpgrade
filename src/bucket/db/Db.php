@@ -46,8 +46,9 @@ class ForgeUpgrade_Bucket_Db {
      *
      * @return Boolean
      */
-    public function tableNameExists($tableName) {
-        $sql = "SHOW TABLES LIKE `$tableName`";
+    public function tableNameExists($tableName)
+    {
+        $sql = 'SHOW TABLES LIKE ' . $this->dbh->quote($tableName);
         $res = $this->dbh->query($sql);
         if ($res && $res->fetch() !== false) {
             return true;
