@@ -11,7 +11,6 @@ Group: Development/Tools
 URL: https://github.com/Enalean/ForgeUpgrade
 Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
-Requires: rh-php56-php-cli, rh-php56-php-pdo
 
 %description
 ForgeUpgrade is an application data (files or databases) upgrade automation
@@ -54,14 +53,3 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{LIB_DIR}/%{name}
 %dir %{LIB_DIR}/%{name}/bin
 %attr(755,root,root) %{LIB_DIR}/%{name}/bin/%{name}
-
-
-%changelog
-* Tue Jan 16 2018 Thomas Gerbet <thomas.gerbet@enalean.com> - 1.3-1
-- Run with rh-php56
-
-* Tue Jun 07 2011 Manuel VACELET <manuel.vacelet@enalean.com> - 1.2-2
-- Change lib dir (force to /usr/lib to avoid 64 bits incompat)
-
-* Tue Jun 15 2010 Manuel VACELET <manuel.vacelet@st.com> - 1.0-1
-- Initial build.
