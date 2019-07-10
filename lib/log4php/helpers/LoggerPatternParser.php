@@ -158,7 +158,7 @@ class LoggerPatternParser {
 					// In literal state, the last char is always a literal.
 					if($this->i == $this->patternLength) {
 						$this->currentLiteral .= $c;
-						continue;
+						break;
 					}
 					if($c == self::ESCAPE_CHAR) {
 						// peek at the next char.
